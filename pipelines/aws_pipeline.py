@@ -29,7 +29,7 @@ if __name__ == "__main__":
         pipeline_name="aws_cur_pipeline",
         destination="duckdb",
         dataset_name="aws_cost_reports",
-        export_schema_path="data_cost/aws_cost.duckdb"
+        export_schema_path="data_cost/aws_cost_schema.json"
 ,
     )
 

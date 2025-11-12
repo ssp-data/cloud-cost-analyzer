@@ -8,4 +8,7 @@ dependencies = [
     #aws
     "dlt[duckdb,s3]>=1.18.2",
     "pyarrow>=22.0.0",
+    #bigquery
+    "dlt[duckdb]>=1.18.2",
+    "google-cloud-bigquery>=3.38.0",
 ]
