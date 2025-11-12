@@ -68,3 +68,10 @@ export AWS_SECRET_ACCESS_KEY=
 ```
 
 Note: You can also set them in [secrets.toml][.dlt/secrets.toml] directly - I have set above and in [.env](.env) it will source them automatically with dlt feature of `SOURCES__FILESYSTEM__CREDENTIALS__AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID"` as example.
+
+
+## Incremental Loads with dlt
+
+We use `write_disposition="append"` to load incrementally, but not merging, as cost data are usually append only.
+
+

@@ -35,7 +35,7 @@ if __name__ == "__main__":
     # Load the data with merge write disposition for deduplication
     load_info = pipeline.run(
         filesystem_pipe.with_name(table_name),
-        write_disposition="merge"
+        write_disposition="append"
     )
 
     print("\n" + "="*50)

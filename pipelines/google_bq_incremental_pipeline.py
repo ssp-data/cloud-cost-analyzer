@@ -9,7 +9,7 @@ from dlt.common import pendulum
 from google.cloud import bigquery
 from google.oauth2 import service_account
 
-@dlt.resource(write_disposition="merge")
+@dlt.resource(write_disposition="append")
 def bigquery_billing_table(
     table_name: str,
     dataset: str = "billing_export",
@@ -69,7 +69,7 @@ def load_standalone_table_resource() -> None:
     # Create resources for each table
     resources = [bigquery_billing_table(table_name) for table_name in table_names]
 
-    # Run the pipeline with merge write disposition
+    # Run the pipeline with incremental (append) write disposition
     # This will only load new records based on export_time
     info = pipeline.run(resources)
     print(info)
