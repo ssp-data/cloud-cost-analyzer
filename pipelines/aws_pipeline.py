@@ -32,11 +32,16 @@ if __name__ == "__main__":
         export_schema_path="data_cost/aws_cost_schema.json",
     )
 
-    # Load the data with merge write disposition for deduplication
-    load_info = pipeline.run(
-        filesystem_pipe.with_name(table_name),
-        write_disposition="append"
+    # Load the data with merge mode and composite primary key for deduplication
+    # AWS CUR records are uniquely identified by line_item_id + time_interval
+    # Using merge instead of append to enforce primary key constraint
+    resource = filesystem_pipe.with_name(table_name)
+    resource.apply_hints(
+        primary_key=["identity_line_item_id", "identity_time_interval"],
+        write_disposition="merge",
+        merge_key=["identity_line_item_id", "identity_time_interval"]
     )
+    load_info = pipeline.run(resource)
 
     print("\n" + "="*50)
     print("Load Info:")
