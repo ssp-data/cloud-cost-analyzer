@@ -6,17 +6,23 @@ install:
 dlt-clear:
 	# rm -rf ~/.dlt/
 	rm -rf ~/.local/share/dlt/
-	# rm aws_cur_pipeline.duckdb
-
 clear-data:
-	rm -r data_cost/aws_cost.duckdb
-
+	rm -r aws_cost.duckdb
+	# rm aws_cur_pipeline.duckdb
+	
 clear: dlt-clear clear-data
+
+
+
 run-aws:
 	uv run python pipelines/aws_pipeline.py
-
 run-bq:
 	uv run python pipelines/incremental_load_bigquery.py
+run-stripe:
+	uv run python pipelines/stripe_analytics_pipeline.py
 
-run-all:
-	uv run python pipelines/aws_pipeline.py
+
+
+
+run-all: run-aws run-bq run-stripe
+
