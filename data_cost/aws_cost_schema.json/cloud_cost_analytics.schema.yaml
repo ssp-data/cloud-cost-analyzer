@@ -1,7 +1,7 @@
 version: 2
-version_hash: 4uXDVcdh9Y2lx48UZIlnU5+CN1c5/p3SIklYXdhxMgM=
+version_hash: dvnRPn1pyQyzzNi0BNGr85mnKa7Pt2myIdcDmW3fpZA=
 engine_version: 11
-name: aws_cur
+name: cloud_cost_analytics
 tables:
   _dlt_version:
     columns:
@@ -421,7 +421,7 @@ tables:
       product_operation:
         nullable: true
         data_type: text
-    write_disposition: append
+    write_disposition: merge
     resource: cur_export_test_00001
     x-normalizer:
       seen-data: true
@@ -461,6 +461,10 @@ tables:
       seen-data: true
   cur_export_test_00001__product:
     columns:
+      _dlt_root_id:
+        data_type: text
+        nullable: false
+        root_key: true
       _dlt_parent_id:
         data_type: text
         nullable: false
@@ -481,6 +485,10 @@ tables:
       value:
         data_type: text
         nullable: true
+      _dlt_root_id:
+        data_type: text
+        nullable: false
+        root_key: true
       _dlt_parent_id:
         data_type: text
         nullable: false
@@ -518,6 +526,11 @@ normalizers:
   names: snake_case
   json:
     module: dlt.common.normalizers.json.relational
+    config:
+      propagation:
+        tables:
+          cur_export_test_00001:
+            _dlt_id: _dlt_root_id
 previous_hashes:
-- /qhYqPO+p5hShDQP+YhTG70dWdyGopjqn86cWWWtORs=
-- 44VtSEj7aMQqXjDDlXixsRWo+0WJ04VO3n+Jva/bUY0=
+- qDclrhAFl7RgP5Cmf1v9u7HM8G1EykiT775MvEF2Kfw=
+- ZlEmC4LpngSQ7GeMERDfDLBCdFGelT3ARgqUCt+Z7Ng=

@@ -26,15 +26,17 @@ if __name__ == "__main__":
 
     # Create pipeline with appropriate naming
     pipeline = dlt.pipeline(
-        pipeline_name="aws_cur_pipeline",
+        pipeline_name="cloud_cost_analytics",
         destination="duckdb",
-        dataset_name="aws_cost_reports",
-        export_schema_path="data_cost/aws_cost_schema.json"
-,
+        dataset_name="aws_costs",
+        export_schema_path="data_cost/aws_cost_schema.json",
     )
 
-    # Load the data
-    load_info = pipeline.run(filesystem_pipe.with_name(table_name))
+    # Load the data with merge write disposition for deduplication
+    load_info = pipeline.run(
+        filesystem_pipe.with_name(table_name),
+        write_disposition="merge"
+    )
 
     print("\n" + "="*50)
     print("Load Info:")

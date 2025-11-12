@@ -27,9 +27,9 @@ def load_data(
         end_date: An optional end date to limit the data retrieved. Defaults to None.
     """
     pipeline = dlt.pipeline(
-        pipeline_name="stripe_analytics",
+        pipeline_name="cloud_cost_analytics",
         destination="duckdb",
-        dataset_name="stripe_updated",
+        dataset_name="stripe_costs",
         export_schema_path="data_cost/stripe_cost_schema.json",
     )
     source = stripe_source(
@@ -62,9 +62,10 @@ def load_incremental_endpoints(
                   Defaults to None. Format: datetime(YYYY, MM, DD).
     """
     pipeline = dlt.pipeline(
-        pipeline_name="stripe_analytics",
+        pipeline_name="cloud_cost_analytics",
         destination="duckdb",
-        dataset_name="stripe_incremental",
+        dataset_name="stripe_costs",
+        export_schema_path="data_cost/stripe_cost_schema.json",
     )
     # load all data on the first run that created before end_date
     source = incremental_stripe_source(
@@ -94,7 +95,8 @@ def load_incremental_endpoints(
 
 
 if __name__ == "__main__":
-    load_data()
+    # Use incremental loading for cost data to avoid duplicates
+    load_incremental_endpoints()
     # # load only data that was created during the period between the Jan 1, 2024 (incl.), and the Feb 1, 2024 (not incl.).
     # from pendulum import datetime
     # load_data(start_date=datetime(2024, 1, 1), end_date=datetime(2024, 2, 1))

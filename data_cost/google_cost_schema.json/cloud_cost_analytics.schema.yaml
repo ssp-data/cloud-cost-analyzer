@@ -1,7 +1,7 @@
 version: 2
-version_hash: somG/TyDX/RiGxBIWu0mJ525PE1IEwIbAPTkJkuMJAY=
+version_hash: 7H9lbETXZbNGdrK6gzlx/OxEe1Vbxw4PgB3SZcJNi4I=
 engine_version: 11
-name: bigquery_billing
+name: cloud_cost_analytics
 tables:
   _dlt_version:
     columns:
@@ -104,5 +104,5 @@ normalizers:
   json:
     module: dlt.common.normalizers.json.relational
 previous_hashes:
-- VBhyUJ6bTEDOa3+Jq6z2FlmMD5VhJaWMaOZnue0vR9g=
-- 8fR3q1efP/nCMT5kc+chhmDzw9OKbvjHybHSE77Jj3o=
+- lvE3xO65/4jJFlDl8NW/GHVWeP+mDjrUxH8gw8qvvJA=
+- nNe/0u8yE67vtI3Z8Jp6FWroU6fPX+JbDuHt26E6z/c=

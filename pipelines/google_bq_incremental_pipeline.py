@@ -54,9 +54,9 @@ def load_standalone_table_resource() -> None:
 
     # Create pipeline to load into local DuckDB
     pipeline = dlt.pipeline(
-        pipeline_name="bigquery_billing",
+        pipeline_name="cloud_cost_analytics",
         destination='duckdb',
-        dataset_name="billing_data",
+        dataset_name="gcp_costs",
         export_schema_path="data_cost/google_cost_schema.json"
     )
 
