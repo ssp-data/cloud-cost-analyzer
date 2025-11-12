@@ -17,9 +17,9 @@ clear: dlt-clear clear-data
 run-aws:
 	uv run python pipelines/aws_pipeline.py
 run-bq:
-	uv run python pipelines/incremental_load_bigquery.py
+	uv run python pipelines/google_bq_incremental_pipeline.py
 run-stripe:
-	uv run python pipelines/stripe_analytics_pipeline.py
+	uv run python pipelines/stripe_pipeline.py
 
 
 
