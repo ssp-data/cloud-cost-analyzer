@@ -1,0 +1,15 @@
+# put your configuration values here
+
+[runtime]
+log_level="WARNING"  # the system log level of dlt
+# use the dlthub_telemetry setting to enable/disable anonymous usage data reporting, see https://dlthub.com/docs/reference/telemetry
+dlthub_telemetry = false
+
+[sources.filesystem]
+local_dir = "/home/sspaeti/Documents/datalake/dlt-stage" # fill this in!
+bucket_url = "https://s3.us-west-1.amazonaws.com" # fill this in!
+
+[sources.aws_cur]
+bucket_url = "s3://cost-analysis-demo-sspaeti"
+file_glob = "cur/CUR-export-test/data/**/*.parquet"
+table_name = "cur_export_test_00001"
