@@ -1,0 +1,78 @@
+# Cloud Cost Analytics Metrics View
+# Reference: https://docs.rilldata.com/reference/project-files/dashboards
+
+version: 1
+type: metrics_view
+
+display_name: Cloud Cost Analytics
+model: unified_cost_model
+timeseries: date
+smallest_time_grain: "day"
+
+dimensions:
+  - name: cloud_provider
+    display_name: Cloud Provider
+    column: cloud_provider
+    description: "Cloud provider or revenue source (AWS, GCP, Stripe)"
+
+  - name: service_name
+    display_name: Service / Product
+    column: service_name
+    description: "Service or product name"
+
+  - name: region
+    display_name: Region
+    column: region
+    description: "Geographic region or global"
+
+  - name: transaction_type
+    display_name: Transaction Type
+    column: transaction_type
+    description: "Type of transaction (cost, revenue, fee, charge)"
+
+  - name: account_id
+    display_name: Account ID
+    column: account_id
+    description: "Account or customer ID"
+
+  - name: currency
+    display_name: Currency
+    column: currency
+    description: "Currency code"
+
+measures:
+  - name: total_cost
+    display_name: "Total Cost"
+    expression: "SUM(cost_amount)"
+    description: "Sum of all costs (AWS, GCP, fees)"
+    format_preset: currency_usd
+
+  - name: total_revenue
+    display_name: "Total Revenue"
+    expression: "SUM(revenue_amount)"
+    description: "Sum of all revenue from Stripe"
+    format_preset: currency_usd
+
+  - name: net_margin
+    display_name: "Net Margin"
+    expression: "SUM(revenue_amount) - SUM(cost_amount)"
+    description: "Revenue minus costs"
+    format_preset: currency_usd
+
+  - name: gross_margin_percent
+    display_name: "Gross Margin %"
+    expression: "CASE WHEN SUM(revenue_amount) > 0 THEN (SUM(revenue_amount) - SUM(cost_amount)) / SUM(revenue_amount) * 100 ELSE 0 END"
+    description: "Gross margin as percentage"
+    format_preset: percentage
+
+  - name: total_transactions
+    display_name: "Total Transactions"
+    expression: "COUNT(*)"
+    description: "Number of cost/revenue records"
+    format_preset: humanize
+
+  - name: avg_transaction_amount
+    display_name: "Avg Transaction"
+    expression: "AVG(amount)"
+    description: "Average transaction amount"
+    format_preset: currency_usd

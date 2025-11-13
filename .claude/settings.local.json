@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(duckdb:*)"
+      "Bash(duckdb:*)",
+      "Bash(rill start:*)"
     ],
     "deny": [],
     "ask": []

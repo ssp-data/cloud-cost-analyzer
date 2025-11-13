@@ -1,2 +1,3 @@
 type: connector
 driver: duckdb
+dsn: "/home/sspaeti/git/work/cost-report-analyse/cloud-cost-analyzer/viz_rill/cloud_cost_analytics.duckdb"

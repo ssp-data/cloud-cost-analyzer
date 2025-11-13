@@ -1,6 +1,6 @@
 compiler: rillv1
 
-display_name: Infra Cost Margins Monitoring Demo
-description: This dashboard identifies opportunities to improve cloud infrastructure operations and to manage customer implementations. In this example, we’ve tied together a combination of cloud services, other hosting costs, and revenue metrics. Cost is the primary metric with insight into Revenue and Margins by Customer.
+display_name: Cloud Cost Analytics
+description: Multi-cloud cost analytics combining AWS, GCP costs and Stripe revenue. Analyze costs by provider, service, region, and time to optimize cloud spending and understand margins.
 
 olap_connector: duckdb

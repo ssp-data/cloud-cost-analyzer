@@ -1,0 +1,26 @@
+# Cloud Cost Analytics Dashboard
+# Reference: https://docs.rilldata.com/reference/project-files/explores
+
+type: explore
+
+display_name: "Cloud Cost Analytics Dashboard"
+description: "Analyze costs from AWS, GCP, and revenue from Stripe across time, regions, and services"
+
+metrics_view: cloud_cost_metrics
+
+dimensions: '*'
+measures: '*'
+
+defaults:
+  comparison_mode: time
+  time_range: P4W  # Last 4 weeks
+  dimensions:
+    - cloud_provider
+  measures:
+    - total_cost
+    - total_revenue
+    - net_margin
+
+theme:
+  primary_color: "#4F46E5"
+  secondary_color: "#06B6D4"
