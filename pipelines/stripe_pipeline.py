@@ -13,16 +13,20 @@ from helpers.stripe_analytics.settings import (
 
 
 def load_data(
-    endpoints: Tuple[str, ...] = ENDPOINTS + INCREMENTAL_ENDPOINTS,
+    endpoints: Tuple[str, ...] = ("Product", "Price"), #use `ENDPOINTS + INCREMENTAL_ENDPOINTS,` for all data
     start_date: Optional[DateTime] = None,
     end_date: Optional[DateTime] = None,
 ) -> None:
     """
-    This demo script uses the resources with non-incremental
-    loading based on "replace" mode to load all data from provided endpoints.
+    Load Stripe reference data (non-incremental, replace mode).
+
+    IMPORTANT: Only loads Product and Price to avoid PII. These endpoints contain:
+    - Product catalog information (names, descriptions, features)
+    - Pricing information (amounts, currencies, billing intervals)
 
     Args:
-        endpoints: A tuple of endpoint names to retrieve data from. Defaults to most popular Stripe API endpoints.
+        endpoints: A tuple of endpoint names to retrieve data from.
+                   Defaults to Product and Price (no PII).
         start_date: An optional start date to limit the data retrieved. Defaults to None.
         end_date: An optional end date to limit the data retrieved. Defaults to None.
     """
@@ -53,21 +57,27 @@ def load_data(
 
 
 def load_incremental_endpoints(
-    endpoints: Tuple[str, ...] = INCREMENTAL_ENDPOINTS,
+    endpoints: Tuple[str, ...] = ("BalanceTransaction",), # use `INCREMENTAL_ENDPOINTS,` to load all data
+
     initial_start_date: Optional[DateTime] = None,
     end_date: Optional[DateTime] = None,
 ) -> None:
     """
-    This demo script demonstrates the use of resources with incremental loading, based on the "append" mode.
-    This approach enables us to load all the data
-    for the first time and only retrieve the newest data later,
-    without duplicating and downloading a massive amount of data.
+    Load Stripe cost data using incremental loading (append mode).
 
-    Make sure you're loading objects that don't change over time.
+    IMPORTANT: Only loads BalanceTransaction to avoid storing PII (customer emails, names, etc).
+    BalanceTransaction contains all necessary financial data for cost analysis:
+    - Transaction amounts, fees, net revenue
+    - Currency and exchange rates
+    - Transaction types and categories
+    - Fee details (Stripe fees, application fees, taxes)
+
+    This approach enables us to load all the data for the first time and only retrieve
+    the newest data later, without duplicating and downloading a massive amount of data.
 
     Args:
         endpoints: A tuple of incremental endpoint names to retrieve data from.
-                   Defaults to Stripe API endpoints with uneditable data.
+                   Defaults to only BalanceTransaction (no PII).
         initial_start_date: An optional parameter that specifies the initial value for dlt.sources.incremental.
                             If parameter is not None, then load only data that were created after initial_start_date on the first run.
                             Defaults to None. Format: datetime(YYYY, MM, DD).

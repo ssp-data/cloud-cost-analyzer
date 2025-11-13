@@ -57,23 +57,6 @@ WHERE 1=1;
 
 -- ============================================================
 
--- Stripe Costs: Check for duplicates in events table
--- Expected: duplicate_count = 0 (events have unique IDs)
-SELECT
-  'Stripe Costs' as source,
-  'event' as table_name,
-  COUNT(*) as total_rows,
-  COUNT(DISTINCT id) as distinct_ids,
-  COUNT(*) - COUNT(DISTINCT id) as duplicate_count,
-  CASE
-    WHEN COUNT(*) - COUNT(DISTINCT id) = 0
-    THEN '✓ PASS'
-    ELSE '✗ FAIL - Duplicates found!'
-  END as status
-FROM stripe_costs.event;
-
--- ============================================================
-
 -- Stripe Costs: Check for duplicates in balance_transaction table
 -- Expected: duplicate_count = 0 (transactions have unique IDs)
 SELECT

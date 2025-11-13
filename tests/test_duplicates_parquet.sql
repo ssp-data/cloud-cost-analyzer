@@ -73,23 +73,6 @@ FROM read_parquet('viz_rill/data/gcp_costs/bigquery_billing_table__project__ance
 
 -- ============================================================
 
--- Stripe Costs: Check for duplicates in events table
--- Expected: duplicate_count = 0 (events have unique IDs)
-SELECT
-  'Stripe Costs' as source,
-  'event' as table_name,
-  COUNT(*) as total_rows,
-  COUNT(DISTINCT id) as distinct_ids,
-  COUNT(*) - COUNT(DISTINCT id) as duplicate_count,
-  CASE
-    WHEN COUNT(*) - COUNT(DISTINCT id) = 0
-    THEN '✓ PASS'
-    ELSE '✗ FAIL - Duplicates found!'
-  END as status
-FROM read_parquet('viz_rill/data/stripe_costs/event/*.parquet');
-
--- ============================================================
-
 -- Stripe Costs: Check for duplicates in balance_transaction table
 -- Expected: duplicate_count = 0 (transactions have unique IDs)
 SELECT
@@ -145,7 +128,6 @@ SELECT
   (SELECT COUNT(*) FROM read_parquet('viz_rill/data/gcp_costs/bigquery_billing_table__labels/*.parquet')) as gcp_labels_rows,
   (SELECT COUNT(*) FROM read_parquet('viz_rill/data/gcp_costs/bigquery_billing_table__project__ancestors/*.parquet')) as gcp_ancestors_rows,
   (SELECT COUNT(*) FROM read_parquet('viz_rill/data/stripe_costs/balance_transaction/*.parquet')) as stripe_rows,
-  (SELECT COUNT(*) FROM read_parquet('viz_rill/data/stripe_costs/event/*.parquet')) as stripe_events,
   '✓ Data available' as status;
 
 -- ============================================================
