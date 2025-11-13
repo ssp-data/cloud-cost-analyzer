@@ -1,5 +1,5 @@
 version: 2
-version_hash: dvnRPn1pyQyzzNi0BNGr85mnKa7Pt2myIdcDmW3fpZA=
+version_hash: 55Y8LecmkGlkaYi4fhOUVDBUOXzcsAh39iO2wASPess=
 engine_version: 11
 name: cloud_cost_analytics
 tables:
@@ -83,11 +83,15 @@ tables:
         x-normalizer:
           seen-null-first: true
       identity_line_item_id:
+        nullable: false
+        primary_key: true
+        merge_key: true
         data_type: text
-        nullable: true
       identity_time_interval:
+        nullable: false
+        primary_key: true
+        merge_key: true
         data_type: text
-        nullable: true
       line_item_availability_zone:
         nullable: true
         x-normalizer:
@@ -532,5 +536,5 @@ normalizers:
           cur_export_test_00001:
             _dlt_id: _dlt_root_id
 previous_hashes:
-- qDclrhAFl7RgP5Cmf1v9u7HM8G1EykiT775MvEF2Kfw=
-- ZlEmC4LpngSQ7GeMERDfDLBCdFGelT3ARgqUCt+Z7Ng=
+- 9BGU4zEDQ4c+uJ61BzEyEHUuJCzeAYN/pSmm5ww7hxY=
+- YVsnL885mt4HL+C4v94ZzvNvifyUWjwm+NMHRIx/nt8=

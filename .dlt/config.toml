@@ -1,7 +1,7 @@
 # put your configuration values here
 
 [runtime]
-log_level="WARNING"  # the system log level of dlt
+log_level="ERROR"  # ERROR hides warning as stripe has many tables that with potentially no data and it might flow the log
 # use the dlthub_telemetry setting to enable/disable anonymous usage data reporting, see https://dlthub.com/docs/reference/telemetry
 dlthub_telemetry = false
 

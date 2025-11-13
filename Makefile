@@ -6,8 +6,9 @@ install:
 dlt-clear:
 	# rm -rf ~/.dlt/
 	rm -rf ~/.local/share/dlt/
+
 clear-data:
-	rm -r cloud_cost_analytics.duckdb
+	mv cloud_cost_analytics.duckdb cloud_cost_analytics.bak_$(shell date +%Y%m%d_%H%M%S).duckdb
 	
 clear: dlt-clear clear-data
 

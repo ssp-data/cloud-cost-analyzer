@@ -1,5 +1,5 @@
-version: 5
-version_hash: kO0OZGnM3yGEtkTlm0akSYLs2NfJAxWqr03BZhjLPTI=
+version: 4
+version_hash: NuTKN7faR5rpJviOOG1sDoL3/BH7UXT85jb0yMi8aWw=
 engine_version: 11
 name: incremental_stripe_source
 tables:
@@ -66,6 +66,63 @@ tables:
       data__object__object:
         data_type: text
         nullable: true
+      data__object__livemode:
+        data_type: bool
+        nullable: true
+      livemode:
+        data_type: bool
+        nullable: true
+      pending_webhooks:
+        data_type: bigint
+        nullable: true
+      type:
+        data_type: text
+        nullable: true
+      _dlt_load_id:
+        data_type: text
+        nullable: false
+      _dlt_id:
+        data_type: text
+        nullable: false
+        unique: true
+        row_key: true
+      data__object__id:
+        data_type: text
+        nullable: true
+      data__object__amount_paid:
+        data_type: bigint
+        nullable: true
+      data__object__amount_requested:
+        data_type: bigint
+        nullable: true
+      data__object__created:
+        data_type: bigint
+        nullable: true
+      data__object__currency:
+        data_type: text
+        nullable: true
+      data__object__invoice:
+        data_type: text
+        nullable: true
+      data__object__is_default:
+        data_type: bool
+        nullable: true
+      data__object__payment__payment_intent:
+        data_type: text
+        nullable: true
+      data__object__payment__type:
+        data_type: text
+        nullable: true
+      data__object__status:
+        data_type: text
+        nullable: true
+      data__object__status_transitions__canceled_at:
+        nullable: true
+        x-normalizer:
+          seen-null-first: true
+      data__object__status_transitions__paid_at:
+        data_type: bigint
+        nullable: true
       data__object__account_country:
         data_type: text
         nullable: true
@@ -82,9 +139,6 @@ tables:
       data__object__amount_overpaid:
         data_type: bigint
         nullable: true
-      data__object__amount_paid:
-        data_type: bigint
-        nullable: true
       data__object__amount_remaining:
         data_type: bigint
         nullable: true
@@ -94,10 +148,16 @@ tables:
       data__object__application:
         data_type: text
         nullable: true
+      data__object__application_fee_amount:
+        data_type: bigint
+        nullable: true
       data__object__attempt_count:
         data_type: bigint
         nullable: true
       data__object__attempted:
+        data_type: bool
+        nullable: true
+      data__object__auto_advance:
         data_type: bool
         nullable: true
       data__object__automatic_tax__disabled_reason:
@@ -122,13 +182,10 @@ tables:
       data__object__billing_reason:
         data_type: text
         nullable: true
-      data__object__collection_method:
+      data__object__charge:
         data_type: text
         nullable: true
-      data__object__created:
-        data_type: bigint
-        nullable: true
-      data__object__currency:
+      data__object__collection_method:
         data_type: text
         nullable: true
       data__object__custom_fields:
@@ -168,6 +225,9 @@ tables:
         nullable: true
         x-normalizer:
           seen-null-first: true
+      data__object__effective_at:
+        data_type: bigint
+        nullable: true
       data__object__ending_balance:
         data_type: bigint
         nullable: true
@@ -179,6 +239,12 @@ tables:
         nullable: true
         x-normalizer:
           seen-null-first: true
+      data__object__hosted_invoice_url:
+        data_type: text
+        nullable: true
+      data__object__invoice_pdf:
+        data_type: text
+        nullable: true
       data__object__issuer__type:
         data_type: text
         nullable: true
@@ -202,11 +268,8 @@ tables:
       data__object__lines__url:
         data_type: text
         nullable: true
-      data__object__livemode:
-        data_type: bool
-        nullable: true
-      data__object__next_payment_attempt:
-        data_type: bigint
+      data__object__number:
+        data_type: text
         nullable: true
       data__object__on_behalf_of:
         nullable: true
@@ -243,34 +306,14 @@ tables:
       data__object__parent__type:
         data_type: text
         nullable: true
+      data__object__payment_intent:
+        data_type: text
+        nullable: true
       data__object__payment_settings__default_mandate:
         nullable: true
         x-normalizer:
           seen-null-first: true
-      data__object__payment_settings__payment_method_options__acss_debit:
-        nullable: true
-        x-normalizer:
-          seen-null-first: true
-      data__object__payment_settings__payment_method_options__bancontact:
-        nullable: true
-        x-normalizer:
-          seen-null-first: true
-      data__object__payment_settings__payment_method_options__card__request_three_d_secure:
-        data_type: text
-        nullable: true
-      data__object__payment_settings__payment_method_options__customer_balance:
-        nullable: true
-        x-normalizer:
-          seen-null-first: true
-      data__object__payment_settings__payment_method_options__konbini:
-        nullable: true
-        x-normalizer:
-          seen-null-first: true
-      data__object__payment_settings__payment_method_options__sepa_debit:
-        nullable: true
-        x-normalizer:
-          seen-null-first: true
-      data__object__payment_settings__payment_method_options__us_bank_account:
+      data__object__payment_settings__payment_method_options:
         nullable: true
         x-normalizer:
           seen-null-first: true
@@ -321,8 +364,8 @@ tables:
         nullable: true
         x-normalizer:
           seen-null-first: true
-      data__object__status:
-        data_type: text
+      data__object__status_transitions__finalized_at:
+        data_type: bigint
         nullable: true
       data__object__status_transitions__marked_uncollectible_at:
         nullable: true
@@ -374,78 +417,9 @@ tables:
         nullable: true
         x-normalizer:
           seen-null-first: true
-      livemode:
-        data_type: bool
-        nullable: true
-      pending_webhooks:
-        data_type: bigint
-        nullable: true
-      type:
-        data_type: text
-        nullable: true
-      _dlt_load_id:
-        data_type: text
-        nullable: false
-      _dlt_id:
-        data_type: text
-        nullable: false
-        unique: true
-        row_key: true
-      data__object__id:
-        data_type: text
-        nullable: true
-      data__object__amount_requested:
-        data_type: bigint
-        nullable: true
-      data__object__invoice:
-        data_type: text
-        nullable: true
-      data__object__is_default:
-        data_type: bool
-        nullable: true
-      data__object__payment__payment_intent:
-        data_type: text
-        nullable: true
-      data__object__payment__type:
-        data_type: text
-        nullable: true
-      data__object__status_transitions__canceled_at:
-        nullable: true
-        x-normalizer:
-          seen-null-first: true
-      data__object__status_transitions__paid_at:
-        nullable: true
-        data_type: bigint
-      data__object__application_fee_amount:
-        nullable: true
-        data_type: bigint
-      data__object__auto_advance:
-        data_type: bool
-        nullable: true
-      data__object__charge:
-        nullable: true
-        data_type: text
-      data__object__effective_at:
-        nullable: true
-        data_type: bigint
-      data__object__hosted_invoice_url:
-        data_type: text
-        nullable: true
-      data__object__invoice_pdf:
-        data_type: text
-        nullable: true
-      data__object__number:
-        nullable: true
-        data_type: text
-      data__object__payment_intent:
-        nullable: true
-        data_type: text
-      data__object__status_transitions__finalized_at:
-        nullable: true
-        data_type: bigint
       data__object__webhooks_delivered_at:
-        nullable: true
         data_type: bigint
+        nullable: true
       data__previous_attributes__amount_paid:
         data_type: bigint
         nullable: true
@@ -677,19 +651,10 @@ tables:
       data__object__balance_transaction:
         data_type: text
         nullable: true
-      data__object__billing_details__address__city:
-        data_type: text
-        nullable: true
       data__object__billing_details__address__country:
         data_type: text
         nullable: true
-      data__object__billing_details__address__line1:
-        data_type: text
-        nullable: true
       data__object__billing_details__address__postal_code:
-        data_type: text
-        nullable: true
-      data__object__billing_details__address__state:
         data_type: text
         nullable: true
       data__object__billing_details__email:
@@ -746,9 +711,6 @@ tables:
         data_type: text
         nullable: true
       data__object__payment_method_details__card__brand:
-        data_type: text
-        nullable: true
-      data__object__payment_method_details__card__checks__address_line1_check:
         data_type: text
         nullable: true
       data__object__payment_method_details__card__checks__address_postal_code_check:
@@ -811,9 +773,10 @@ tables:
         nullable: true
         x-normalizer:
           seen-null-first: true
-      data__object__payment_method_details__card__wallet__type:
-        data_type: text
+      data__object__payment_method_details__card__wallet:
         nullable: true
+        x-normalizer:
+          seen-null-first: true
       data__object__payment_method_details__type:
         data_type: text
         nullable: true
@@ -900,10 +863,6 @@ tables:
         x-normalizer:
           seen-null-first: true
       data__object__pause_collection:
-        nullable: true
-        x-normalizer:
-          seen-null-first: true
-      data__object__payment_settings__payment_method_options__card__network:
         nullable: true
         x-normalizer:
           seen-null-first: true
@@ -1024,6 +983,55 @@ tables:
       data__object__automatically_finalizes_at:
         nullable: true
         data_type: bigint
+      data__object__next_payment_attempt:
+        nullable: true
+        data_type: bigint
+      data__object__payment_settings__payment_method_options__acss_debit:
+        nullable: true
+        x-normalizer:
+          seen-null-first: true
+      data__object__payment_settings__payment_method_options__bancontact:
+        nullable: true
+        x-normalizer:
+          seen-null-first: true
+      data__object__payment_settings__payment_method_options__card__request_three_d_secure:
+        data_type: text
+        nullable: true
+      data__object__payment_settings__payment_method_options__customer_balance:
+        nullable: true
+        x-normalizer:
+          seen-null-first: true
+      data__object__payment_settings__payment_method_options__konbini:
+        nullable: true
+        x-normalizer:
+          seen-null-first: true
+      data__object__payment_settings__payment_method_options__sepa_debit:
+        nullable: true
+        x-normalizer:
+          seen-null-first: true
+      data__object__payment_settings__payment_method_options__us_bank_account:
+        nullable: true
+        x-normalizer:
+          seen-null-first: true
+      data__object__billing_details__address__city:
+        nullable: true
+        data_type: text
+      data__object__billing_details__address__line1:
+        nullable: true
+        data_type: text
+      data__object__billing_details__address__state:
+        nullable: true
+        data_type: text
+      data__object__payment_method_details__card__checks__address_line1_check:
+        nullable: true
+        data_type: text
+      data__object__payment_method_details__card__wallet__type:
+        data_type: text
+        nullable: true
+      data__object__payment_settings__payment_method_options__card__network:
+        nullable: true
+        x-normalizer:
+          seen-null-first: true
       data__object__billing_details__address__line2:
         nullable: true
         data_type: text
@@ -1864,6 +1872,104 @@ tables:
     resource: _dlt_pipeline_state
     x-normalizer:
       seen-data: true
+  event__data__object__available:
+    columns:
+      amount:
+        data_type: bigint
+        nullable: true
+      currency:
+        data_type: text
+        nullable: true
+      source_types__card:
+        data_type: bigint
+        nullable: true
+      _dlt_parent_id:
+        data_type: text
+        nullable: false
+        parent_key: true
+      _dlt_list_idx:
+        data_type: bigint
+        nullable: false
+      _dlt_id:
+        data_type: text
+        nullable: false
+        unique: true
+        row_key: true
+    parent: event
+    x-normalizer:
+      seen-data: true
+  event__data__object__pending:
+    columns:
+      amount:
+        data_type: bigint
+        nullable: true
+      currency:
+        data_type: text
+        nullable: true
+      source_types__card:
+        data_type: bigint
+        nullable: true
+      _dlt_parent_id:
+        data_type: text
+        nullable: false
+        parent_key: true
+      _dlt_list_idx:
+        data_type: bigint
+        nullable: false
+      _dlt_id:
+        data_type: text
+        nullable: false
+        unique: true
+        row_key: true
+    parent: event
+    x-normalizer:
+      seen-data: true
+  event__data__object__refund_and_dispute_prefunding__available:
+    columns:
+      amount:
+        data_type: bigint
+        nullable: true
+      currency:
+        data_type: text
+        nullable: true
+      _dlt_parent_id:
+        data_type: text
+        nullable: false
+        parent_key: true
+      _dlt_list_idx:
+        data_type: bigint
+        nullable: false
+      _dlt_id:
+        data_type: text
+        nullable: false
+        unique: true
+        row_key: true
+    parent: event
+    x-normalizer:
+      seen-data: true
+  event__data__object__refund_and_dispute_prefunding__pending:
+    columns:
+      amount:
+        data_type: bigint
+        nullable: true
+      currency:
+        data_type: text
+        nullable: true
+      _dlt_parent_id:
+        data_type: text
+        nullable: false
+        parent_key: true
+      _dlt_list_idx:
+        data_type: bigint
+        nullable: false
+      _dlt_id:
+        data_type: text
+        nullable: false
+        unique: true
+        row_key: true
+    parent: event
+    x-normalizer:
+      seen-data: true
   event__data__object__lines__data:
     columns:
       id:
@@ -1886,6 +1992,9 @@ tables:
         nullable: true
       discountable:
         data_type: bool
+        nullable: true
+      invoice:
+        data_type: text
         nullable: true
       livemode:
         data_type: bool
@@ -2119,108 +2228,6 @@ tables:
         data_type: text
         nullable: true
       unit_amount_excluding_tax:
-        data_type: text
-        nullable: true
-      _dlt_parent_id:
-        data_type: text
-        nullable: false
-        parent_key: true
-      _dlt_list_idx:
-        data_type: bigint
-        nullable: false
-      _dlt_id:
-        data_type: text
-        nullable: false
-        unique: true
-        row_key: true
-      invoice:
-        data_type: text
-        nullable: true
-        x-normalizer: {}
-    parent: event
-    x-normalizer:
-      seen-data: true
-  event__data__object__available:
-    columns:
-      amount:
-        data_type: bigint
-        nullable: true
-      currency:
-        data_type: text
-        nullable: true
-      source_types__card:
-        data_type: bigint
-        nullable: true
-      _dlt_parent_id:
-        data_type: text
-        nullable: false
-        parent_key: true
-      _dlt_list_idx:
-        data_type: bigint
-        nullable: false
-      _dlt_id:
-        data_type: text
-        nullable: false
-        unique: true
-        row_key: true
-    parent: event
-    x-normalizer:
-      seen-data: true
-  event__data__object__pending:
-    columns:
-      amount:
-        data_type: bigint
-        nullable: true
-      currency:
-        data_type: text
-        nullable: true
-      source_types__card:
-        data_type: bigint
-        nullable: true
-      _dlt_parent_id:
-        data_type: text
-        nullable: false
-        parent_key: true
-      _dlt_list_idx:
-        data_type: bigint
-        nullable: false
-      _dlt_id:
-        data_type: text
-        nullable: false
-        unique: true
-        row_key: true
-    parent: event
-    x-normalizer:
-      seen-data: true
-  event__data__object__refund_and_dispute_prefunding__available:
-    columns:
-      amount:
-        data_type: bigint
-        nullable: true
-      currency:
-        data_type: text
-        nullable: true
-      _dlt_parent_id:
-        data_type: text
-        nullable: false
-        parent_key: true
-      _dlt_list_idx:
-        data_type: bigint
-        nullable: false
-      _dlt_id:
-        data_type: text
-        nullable: false
-        unique: true
-        row_key: true
-    parent: event
-    x-normalizer:
-      seen-data: true
-  event__data__object__refund_and_dispute_prefunding__pending:
-    columns:
-      amount:
-        data_type: bigint
-        nullable: true
-      currency:
         data_type: text
         nullable: true
       _dlt_parent_id:
@@ -2751,6 +2758,9 @@ tables:
       amount:
         data_type: bigint
         nullable: true
+      application:
+        data_type: text
+        nullable: true
       currency:
         data_type: text
         nullable: true
@@ -2772,10 +2782,6 @@ tables:
         nullable: false
         unique: true
         row_key: true
-      application:
-        data_type: text
-        nullable: true
-        x-normalizer: {}
     parent: balance_transaction
     x-normalizer:
       seen-data: true
@@ -2815,11 +2821,15 @@ tables:
         x-normalizer:
           seen-null-first: true
       identity_line_item_id:
+        nullable: false
+        primary_key: true
+        merge_key: true
         data_type: text
-        nullable: true
       identity_time_interval:
+        nullable: false
+        primary_key: true
+        merge_key: true
         data_type: text
-        nullable: true
       line_item_availability_zone:
         nullable: true
         x-normalizer:
@@ -3230,8 +3240,7 @@ normalizers:
           cur_export_test_00001:
             _dlt_id: _dlt_root_id
 previous_hashes:
-- +sbKvwyVSYSLyhs/dU5ViMBATyHEDfI8xLYkn1Y9pMU=
-- att1J4cAEqPj3ShVLOVfKVp9Sq3y1m8hHVSAUKK2x4s=
-- zFFFzHn1d1DjaIsSWvd4dUFgJwbQ2tKyQcNHuYRROjk=
+- 9Y0iWWJ3pjDfDlZAZAHtZ3Zxei+md6f2m8TzjA0R6Mo=
+- rtM8bQI8FqNySL+p2iIBWTqfUhzVxNZrk2BPgzvjv0Q=
 - mEfsw3kp5SxA0hsCuFN4ycnsqx0lVL9Z+xStoZfrxv0=
 - 2Dvpy/GGT7+3Fl/69/QfbHylAeFZjnD/LRRe+X8YjF0=
