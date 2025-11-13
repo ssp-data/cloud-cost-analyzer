@@ -7,6 +7,6 @@ SELECT
    + SUM(IFNULL((SELECT SUM(CAST(c.amount * 1000000 as int64))
                  FROM UNNEST(credits) c), 0))) / 1000000
    AS total_exact
-FROM `ctg-storage.bigquery_billing_export.gcp_billing_export_v1_01150A_B8F62B_47D999`
+FROM `testing-bigquery-220511.billing_export.gcp_billing_export_v1_014CCF_84D5DF_A43BC0`
 GROUP BY 1
 ORDER BY 1 ASC
