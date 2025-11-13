@@ -1,0 +1,8 @@
+# Rill Theme Configuration
+type: theme
+
+colors:
+  primary: "#FF9900"      # AWS Orange
+  secondary: "#232F3E"    # AWS Dark Blue
+
+# Add more theme customization as needed

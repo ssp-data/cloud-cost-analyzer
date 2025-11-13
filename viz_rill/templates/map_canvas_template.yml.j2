@@ -1,0 +1,130 @@
+type: canvas
+display_name: Dynamic Tag Insights
+defaults: { time_range: P12M }
+
+rows:
+{% for tag in tag_charts %}
+  {# ─────────────────────────────────────────────────────────────── #}
+  {#  KPI + PIE  ─ exactly one dominant value                       #}
+  {# ─────────────────────────────────────────────────────────────── #}
+  {% if tag.layout == 'kpi+pie' %}
+  - items:
+      - kpi_grid:
+          measures: [ {{ cost_measure }} ]
+          metrics_view: {{ metrics_view }}
+          dimension_filters: {{ tag.dimension }} IN ('{{ tag.filter_in[0] }}')
+          title: "{{ tag.dimension | replace('resource_tags_', '') | replace('_', ' ') | title }} — {{ tag.filter_in[0] }}"
+        width: 4
+
+      - pie_chart:
+          color:
+            field: {{ tag.dimension }}
+            type: nominal
+            innerRadius: 50
+            limit: 10
+          measure:
+            field: {{ cost_measure }}
+            type: quantitative
+          metrics_view: {{ metrics_view }}
+          dimension_filters: {{ tag.dimension }} NIN ('{{ tag.filter_in[0] }}')
+          title: "{{ tag.dimension | replace('resource_tags_', '') | replace('_', ' ') | title }} — Other"
+        width: 8
+    height: 280px
+
+  {# ─────────────────────────────────────────────────────────────── #}
+  {#  LEADERBOARD + PIE  ─ a few dominant values                    #}
+  {# ─────────────────────────────────────────────────────────────── #}
+  {% elif tag.layout == 'leaderboard+pie' %}
+  - items:
+      - leaderboard:
+          dimensions: [ {{ tag.dimension }} ]
+          measures:   [ {{ cost_measure }} ]
+          num_rows:   10
+          metrics_view: {{ metrics_view }}
+          dimension_filters: {{ tag.dimension }} IN (
+            {%- for v in tag.filter_in -%}'{{ v }}'{% if not loop.last %}, {% endif %}{%- endfor -%})
+          title: "{{ tag.dimension | replace('resource_tags_', '') | replace('_', ' ') | title }} — Top"
+        width: 6
+
+      - pie_chart:
+          color:
+            field: {{ tag.dimension }}
+            type: nominal
+            innerRadius: 50
+            limit: 10
+          measure:
+            field: {{ cost_measure }}
+            type: quantitative
+          metrics_view: {{ metrics_view }}
+          dimension_filters: {{ tag.dimension }} NIN (
+            {%- for v in tag.filter_in -%}'{{ v }}'{% if not loop.last %}, {% endif %}{%- endfor -%})
+          title: "{{ tag.dimension | replace('resource_tags_', '') | replace('_', ' ') | title }} — Others"
+        width: 6
+    height: 280px
+
+  {# ─────────────────────────────────────────────────────────────── #}
+  {#  KPI-ONLY  ─ one slice gobbles *everything*                    #}
+  {# ─────────────────────────────────────────────────────────────── #}
+  {% elif tag.layout == 'kpi' %}
+  - items:
+      - kpi_grid:
+          measures: [ {{ cost_measure }} ]
+          metrics_view: {{ metrics_view }}
+          dimension_filters: {{ tag.dimension }} IN ('{{ tag.filter_in[0] }}')
+          title: "{{ tag.dimension | replace('resource_tags_', '') | replace('_', ' ') | title }} — {{ tag.filter_in[0] }}"
+        width: 12
+    height: 160px
+
+  {# ─────────────────────────────────────────────────────────────── #}
+  {#  LEADERBOARD-ONLY  ─ many dominant values, nothing left        #}
+  {# ─────────────────────────────────────────────────────────────── #}
+  {% elif tag.layout == 'leaderboard' %}
+  - items:
+      - leaderboard:
+          dimensions: [ {{ tag.dimension }} ]
+          measures:   [ {{ cost_measure }} ]
+          num_rows:   15
+          metrics_view: {{ metrics_view }}
+          dimension_filters: {{ tag.dimension }} IN (
+            {%- for v in tag.filter_in -%}'{{ v }}'{% if not loop.last %}, {% endif %}{%- endfor -%})
+          title: "{{ tag.dimension | replace('resource_tags_', '') | replace('_', ' ') | title }}"
+        width: 12
+    height: 280px
+
+  {# ─────────────────────────────────────────────────────────────── #}
+  {#  SINGLE-CHART  ─ no strong skew; tag.chart is pie/bar/leader   #}
+  {# ─────────────────────────────────────────────────────────────── #}
+  {% else %}
+  - items:
+      - {{ tag.chart }}:
+          {% if tag.chart == 'bar_chart' %}
+          x:
+            field: {{ tag.dimension }}
+            type: nominal
+            limit: 10
+          {% endif %}
+
+          {% if tag.chart != 'leaderboard' %}
+          color:
+            field: {{ tag.dimension }}
+            type: nominal
+            {% if tag.chart == 'pie_chart' %}innerRadius: 50{% endif %}
+            limit: 10
+          measure:
+            field: {{ cost_measure }}
+            type: quantitative
+          {% else %}
+          dimensions: [ {{ tag.dimension }} ]
+          measures:   [ {{ cost_measure }} ]
+          num_rows: 15
+          {% endif %}
+          metrics_view: {{ metrics_view }}
+          title: "{{ tag.dimension | replace('resource_tags_', '') | replace('_', ' ') | title }}"
+        width: 12
+    height: 280px
+  {% endif %}
+{% endfor %}
+
+time_ranges: [PT24H, P7D, P30D, P3M, P12M]
+filters: { enable: true }
+theme: theme

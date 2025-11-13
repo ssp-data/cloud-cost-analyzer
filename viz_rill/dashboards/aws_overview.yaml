@@ -1,0 +1,221 @@
+# AWS Cost Overview Canvas
+# Advanced analytics dashboard for AWS Cost and Usage Report
+# Inspired by: https://github.com/rilldata/aws-cur-wizard
+
+type: canvas
+display_name: "AWS Cost Analytics"
+
+defaults:
+  comparison_mode: time
+  time_range: P12M  # Last 12 months
+
+rows:
+  # ═══════════════════════════════════════════════════════════
+  # Row 1: Key Cost Metrics (Unblended vs Effective Cost)
+  # ═══════════════════════════════════════════════════════════
+  # Goal: Understand true spend after RI / SP commitments
+  # Why: Budgeting & forecasting require amortized costs
+  - items:
+      - kpi_grid:
+          comparison: [delta, percent_change]
+          measures:
+            - total_unblended_cost
+            - total_effective_cost
+            - ri_savings
+            - sp_savings
+          metrics_view: aws_cost_metrics
+          sparkline: right
+        width: 12
+    height: 200px
+
+  # ═══════════════════════════════════════════════════════════
+  # Row 2: Product Distribution (Family + Service Name)
+  # ═══════════════════════════════════════════════════════════
+  # Goal: Understand spend by product family & service
+  # Why: High-level view of where costs are concentrated
+  - items:
+      - pie_chart:
+          color:
+            field: product_product_family
+            limit: 10
+            type: nominal
+          innerRadius: 50
+          measure:
+            field: total_unblended_cost
+            type: quantitative
+          metrics_view: aws_cost_metrics
+          title: "Spend by Product Family"
+        width: 6
+
+      - pie_chart:
+          color:
+            field: product_servicename
+            limit: 10
+            type: nominal
+          innerRadius: 50
+          measure:
+            field: total_unblended_cost
+            type: quantitative
+          metrics_view: aws_cost_metrics
+          title: "Spend by Service Name"
+        width: 6
+    height: 300px
+
+  # ═══════════════════════════════════════════════════════════
+  # Row 3: Cost Over Time Trend
+  # ═══════════════════════════════════════════════════════════
+  # Goal: Spot which AWS services are driving changes over time
+  # Why: Guides optimization work (e.g., focus on S3 vs. EC2)
+  - items:
+      - line_chart:
+          color:
+            field: product_product_name
+            type: nominal
+            limit: 10
+          metrics_view: aws_cost_metrics
+          x:
+            field: date
+            type: temporal
+          y:
+            field: total_unblended_cost
+            type: quantitative
+            zeroBasedOrigin: true
+          title: "Cost Over Time by Service"
+        width: 12
+    height: 350px
+
+  # ═══════════════════════════════════════════════════════════
+  # Row 4: Regional Analysis
+  # ═══════════════════════════════════════════════════════════
+  # Goal: Identify geographical concentration & expensive Regions
+  # Why: Enables placement or savings-plan purchases in cheaper Regions
+  - items:
+      - bar_chart:
+          metrics_view: aws_cost_metrics
+          color:
+            field: product_region_code
+            type: nominal
+          x:
+            field: product_region_code
+            type: nominal
+            limit: 15
+          y:
+            field: total_unblended_cost
+            type: quantitative
+          title: "Cost by AWS Region"
+        width: 12
+    height: 300px
+
+  # ═══════════════════════════════════════════════════════════
+  # Row 5: Account Distribution
+  # ═══════════════════════════════════════════════════════════
+  # Goal: Map spend to child accounts or environments
+  # Why: Multi-account orgs need per-team visibility
+  - items:
+      - bar_chart:
+          metrics_view: aws_cost_metrics
+          x:
+            field: line_item_usage_account_name
+            type: nominal
+            limit: 20
+          y:
+            field: total_unblended_cost
+            type: quantitative
+          color:
+            field: line_item_usage_account_name
+            type: nominal
+          title: "Spend by AWS Account"
+        width: 12
+    height: 300px
+
+  # ═══════════════════════════════════════════════════════════
+  # Row 6: Unit Economics & Efficiency
+  # ═══════════════════════════════════════════════════════════
+  # Goal: Track efficiency (e.g., $/GB, $/vCPU-hr)
+  # Why: Raw cost alone may rise with usage; this normalizes for growth
+  - items:
+      - line_chart:
+          metrics_view: aws_cost_metrics
+          x:
+            field: date
+            type: temporal
+          y:
+            field: cost_per_unit
+            type: quantitative
+          title: "Unit Economics Trend ($ per usage-unit)"
+        width: 6
+
+      - line_chart:
+          metrics_view: aws_cost_metrics
+          x:
+            field: date
+            type: temporal
+          y:
+            field: total_usage_amount
+            type: quantitative
+          title: "Total Usage Amount Over Time"
+        width: 6
+    height: 300px
+
+  # ═══════════════════════════════════════════════════════════
+  # Row 7: RI Utilization Tracking
+  # ═══════════════════════════════════════════════════════════
+  # Goal: Monitor Reserved Instance utilization
+  # Why: Identify wasted RI spend
+  - items:
+      - kpi_grid:
+          measures:
+            - ri_recurring_fees
+            - ri_unused_fees
+            - ri_utilization_rate
+          metrics_view: aws_cost_metrics
+          comparison: [delta, percent_change]
+          title: "Reserved Instance Metrics"
+        width: 6
+
+      - line_chart:
+          metrics_view: aws_cost_metrics
+          x:
+            field: date
+            type: temporal
+          y:
+            field: ri_utilization_rate
+            type: quantitative
+          title: "RI Utilization % Over Time"
+        width: 6
+    height: 280px
+
+  # ═══════════════════════════════════════════════════════════
+  # Row 8: Marketplace Spend
+  # ═══════════════════════════════════════════════════════════
+  # Goal: Isolate spend on 3rd-party Marketplace products
+  # Why: Marketplace charges sometimes hide in blended totals
+  - items:
+      - pie_chart:
+          metrics_view: aws_cost_metrics
+          measure:
+            field: marketplace_cost
+            type: quantitative
+          color:
+            field: product_product_name
+            type: nominal
+            limit: 10
+          title: "Marketplace Spend Breakdown"
+        width: 6
+
+      - kpi_grid:
+          measures:
+            - marketplace_cost
+            - marketplace_share
+          metrics_view: aws_cost_metrics
+          comparison: [delta, percent_change]
+          title: "Marketplace Metrics"
+        width: 6
+    height: 280px
+
+# Global Settings
+time_ranges: [PT24H, P7D, P30D, P3M, P6M, P12M, P24M]
+filters:
+  enable: true
+
+theme: theme

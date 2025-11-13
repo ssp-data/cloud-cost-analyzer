@@ -46,3 +46,27 @@ test: test-duplicates
 
 serve:
 	rill start viz_rill
+
+## AWS-Specific Advanced Analytics (aws-cur-wizard integration)
+aws-normalize:
+	@echo "Normalizing AWS CUR data..."
+	cd viz_rill && uv run python scripts/normalize.py
+
+aws-generate-dashboards:
+	@echo "Generating AWS-specific Rill dashboards..."
+	cd viz_rill && uv run python scripts/generate_rill_yaml.py \
+		--parquet data/normalized_aws.parquet \
+		--output-dir . \
+		--cost-col line_item_unblended_cost \
+		--dim-prefixes "product_,line_item_" \
+		--timeseries-col date
+
+aws-dashboards: aws-normalize aws-generate-dashboards
+	@echo "✅ AWS dashboards generated! Run 'make serve' to view them."
+
+aws-list-cost-cols:
+	@echo "Available cost columns in AWS data:"
+	cd viz_rill && uv run python scripts/generate_rill_yaml.py \
+		--parquet data/normalized_aws.parquet \
+		--output-dir . \
+		--list-cost-columns

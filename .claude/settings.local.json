@@ -8,7 +8,12 @@
       "Bash(make run-aws:*)",
       "Bash(tree:*)",
       "Bash(timeout 10 rill start:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(mkdir:*)",
+      "Bash(python scripts/normalize_aws.py:*)",
+      "Bash(uv add:*)",
+      "Bash(make:*)",
+      "Bash(timeout 20 rill start:*)"
     ],
     "deny": [],
     "ask": []

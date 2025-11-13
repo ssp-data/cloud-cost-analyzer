@@ -1,0 +1,5 @@
+type: source
+connector: duckdb
+sql: |
+  SELECT *
+  FROM read_parquet('/home/sspaeti/git/work/cost-report-analyse/cloud-cost-analyzer/viz_rill/data/normalized.parquet')

@@ -1,0 +1,178 @@
+# AWS Cost & Usage Metrics View
+# Advanced metrics for AWS Cost and Usage Report analysis
+# Inspired by: https://github.com/rilldata/aws-cur-wizard
+
+version: 1
+type: metrics_view
+
+display_name: AWS Cost & Usage Analytics
+model: aws_cost_normalized
+timeseries: date
+smallest_time_grain: "day"
+
+# ─── Dimensions ─────────────────────────────────────
+dimensions:
+  # Bill dimensions
+  - name: bill_payer_account_name
+    column: bill_payer_account_name
+    display_name: Payer Account
+
+  # Line Item dimensions
+  - name: line_item_product_code
+    column: line_item_product_code
+    display_name: Product Code
+
+  - name: line_item_line_item_type
+    column: line_item_line_item_type
+    display_name: Line Item Type
+
+  - name: line_item_usage_account_id
+    column: line_item_usage_account_id
+    display_name: Usage Account ID
+
+  - name: line_item_usage_account_name
+    column: line_item_usage_account_name
+    display_name: Usage Account
+
+  - name: line_item_usage_type
+    column: line_item_usage_type
+    display_name: Usage Type
+
+  - name: line_item_operation
+    column: line_item_operation
+    display_name: Operation
+
+  # Product dimensions
+  - name: product_product_name
+    column: product_product_name
+    display_name: Product Name
+
+  - name: product_servicename
+    column: product_servicename
+    display_name: Service Name
+
+  - name: product_product_family
+    column: product_product_family
+    display_name: Product Family
+
+  - name: product_region_code
+    column: product_region_code
+    display_name: Region
+
+  - name: product_location
+    column: product_location
+    display_name: Location
+
+  # Pricing dimensions
+  - name: pricing_term
+    column: pricing_term
+    display_name: Pricing Term
+
+
+# ─── Measures ───────────────────────────────────────
+measures:
+  # Primary Cost Measures
+  - name: total_unblended_cost
+    display_name: "Unblended Cost"
+    expression: SUM(line_item_unblended_cost)
+    description: "Total unblended cost (list price)"
+    format_preset: currency_usd
+
+  - name: total_blended_cost
+    display_name: "Blended Cost"
+    expression: SUM(line_item_blended_cost)
+    description: "Total blended cost (averaged across accounts)"
+    format_preset: currency_usd
+
+
+  # Effective Cost (RI + SP adjusted)
+  - name: total_effective_cost
+    display_name: "Effective Cost"
+    expression: |
+      SUM(
+        CASE
+          WHEN reservation_effective_cost > 0 THEN reservation_effective_cost
+          WHEN savings_plan_savings_plan_effective_cost > 0 THEN savings_plan_savings_plan_effective_cost
+          ELSE line_item_unblended_cost
+        END
+      )
+    description: "True cost after RI/SP amortization"
+    format_preset: currency_usd
+
+  # Usage Metrics
+  - name: total_usage_amount
+    display_name: "Usage Amount"
+    expression: SUM(line_item_usage_amount)
+    description: "Total usage quantity"
+    format_preset: humanize
+
+  # Unit Economics
+  - name: cost_per_unit
+    display_name: "Cost per Unit"
+    expression: |
+      SUM(line_item_unblended_cost) / NULLIF(SUM(line_item_usage_amount), 0)
+    description: "Average cost per usage unit"
+    format_preset: currency_usd
+
+  # On-Demand Pricing
+  - name: total_on_demand_cost
+    display_name: "On-Demand Cost"
+    expression: SUM(pricing_public_on_demand_cost)
+    description: "What it would cost at on-demand rates"
+    format_preset: currency_usd
+
+  # Discount & Savings Tracking
+  - name: ri_savings
+    display_name: "RI Savings"
+    expression: |
+      SUM(pricing_public_on_demand_cost - reservation_effective_cost)
+    description: "Savings from Reserved Instances"
+    format_preset: currency_usd
+
+  - name: sp_savings
+    display_name: "Savings Plan Savings"
+    expression: |
+      SUM(pricing_public_on_demand_cost - savings_plan_savings_plan_effective_cost)
+    description: "Savings from Savings Plans"
+    format_preset: currency_usd
+
+  # RI Utilization Metrics
+  - name: ri_recurring_fees
+    display_name: "RI Recurring Fees"
+    expression: SUM(reservation_recurring_fee_for_usage)
+    format_preset: currency_usd
+
+  - name: ri_unused_fees
+    display_name: "RI Unused Fees"
+    expression: SUM(reservation_unused_recurring_fee)
+    format_preset: currency_usd
+    description: "Wasted RI fees (unused capacity)"
+
+  - name: ri_utilization_rate
+    display_name: "RI Utilization %"
+    expression: |
+      100.0 * SUM(reservation_recurring_fee_for_usage) /
+      NULLIF(SUM(reservation_recurring_fee_for_usage + reservation_unused_recurring_fee), 0)
+    description: "Percentage of RI capacity actually used"
+    format_preset: percentage
+
+  # Marketplace Fees
+  - name: marketplace_cost
+    display_name: "Marketplace Cost"
+    expression: |
+      SUM(CASE WHEN line_item_line_item_type = 'Fee' THEN line_item_unblended_cost ELSE 0 END)
+    description: "3rd party marketplace charges"
+    format_preset: currency_usd
+
+  - name: marketplace_share
+    display_name: "Marketplace % of Spend"
+    expression: |
+      100.0 * SUM(CASE WHEN line_item_line_item_type = 'Fee' THEN line_item_unblended_cost ELSE 0 END) /
+      NULLIF(SUM(line_item_unblended_cost), 0)
+    format_preset: percentage
+
+  # Record Count
+  - name: line_item_count
+    display_name: "Line Items"
+    expression: COUNT(*)
+    format_preset: humanize

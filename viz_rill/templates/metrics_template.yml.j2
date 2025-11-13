@@ -1,0 +1,102 @@
+version: 1
+type: metrics_view
+display_name: AWS Cost & Usage
+model: {{ model }}
+timeseries: {{ timeseries }}
+
+# ─── Dimensions ─────────────────────────────────────
+dimensions:
+{% for dim in dimensions %}
+  - name: {{ dim }}
+    column: {{ dim }}
+{% endfor %}
+
+# ─── Measures ───────────────────────────────────────
+measures:
+{% for fact in facts %}
+  - name: sum_{{ fact }}
+    display_name: {{ fact | replace("_", " ") | title }}
+    expression: sum({{ fact }})
+{% endfor %}
+
+{# Total / Blended / Net / Usage ------------------------------------------------ #}
+{% if 'line_item_unblended_cost' in columns %}
+  - name: total_unblended_cost
+    display_name: Unblended Cost
+    expression: sum(line_item_unblended_cost)
+{% endif %}
+
+{% if 'line_item_blended_cost' in columns %}
+  - name: total_blended_cost
+    display_name: Blended Cost
+    expression: sum(line_item_blended_cost)
+{% endif %}
+
+{% if 'line_item_net_unblended_cost' in columns %}
+  - name: net_unblended_cost
+    display_name: Net Unblended Cost
+    expression: sum(line_item_net_unblended_cost)
+{% endif %}
+
+{% if 'line_item_usage_amount' in columns %}
+  - name: total_usage_amount
+    display_name: Usage Amount
+    expression: sum(line_item_usage_amount)
+{% endif %}
+
+{# Rate & Discount ------------------------------------------------------------- #}
+{% if 'pricing_public_on_demand_cost' in columns %}
+  - name: avg_on_demand_rate
+    display_name: Avg On-Demand Rate
+    expression: avg(pricing_public_on_demand_cost)
+{% endif %}
+
+{% if 'discount_total_discount' in columns %}
+  - name: total_discount_sum
+    display_name: Total Discount
+    expression: sum(discount_total_discount)
+{% endif %}
+
+{# RI / Savings Plan ----------------------------------------------------------- #}
+{% if 'reservation_effective_cost' in columns %}
+  - name: ri_effective_cost
+    display_name: RI Effective Cost
+    expression: sum(reservation_effective_cost)
+{% endif %}
+
+{% if 'savings_plan_savings_plan_effective_cost' in columns %}
+  - name: sp_effective_cost
+    display_name: SP Effective Cost
+    expression: sum(savings_plan_savings_plan_effective_cost)
+{% endif %}
+
+{# Derived metric: Cost per Unit ---------------------------------------------- #}
+{% if 'line_item_unblended_cost' in columns and 'line_item_usage_amount' in columns %}
+  - name: cost_per_unit
+    display_name: Cost per Unit
+    requires: [total_unblended_cost, total_usage_amount]
+    expression: total_unblended_cost / total_usage_amount
+{% endif %}
+
+{# Derived metric: Total Effective Cost ---------------------------------------------- #}
+{% if 'reservation_effective_cost' in columns and 'savings_plan_savings_plan_effective_cost' in columns and 'line_item_unblended_cost' in columns %}
+  - name: total_effective_cost
+    display_name: Effective Cost
+    requires: [ri_effective_cost, sp_effective_cost, total_unblended_cost]
+    # anything NOT covered by RI/SP remains as unblended
+    expression: ri_effective_cost + sp_effective_cost + (total_unblended_cost - ri_effective_cost - sp_effective_cost)
+{% endif %}
+
+{# Marketplace Fees ---------------------------------------------------------------- #}
+{% if 'line_item_unblended_cost' in columns and 'line_item_line_item_type' in columns %}
+  - name: mp_cost
+    display_name: Marketplace Cost
+    expression: "sum(if(line_item_line_item_type = 'Fee', line_item_unblended_cost, 0))"
+
+  - name: mp_share
+    display_name: Marketplace % of Spend
+    requires: [mp_cost, total_unblended_cost]
+    expression: mp_cost / nullif(total_unblended_cost, 0)
+{% endif %}
+
+

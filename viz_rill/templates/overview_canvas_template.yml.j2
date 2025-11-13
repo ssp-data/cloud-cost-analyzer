@@ -1,0 +1,196 @@
+type: canvas
+display_name: Advanced AWS Cost Canvas
+defaults:
+  comparison_mode: time
+  time_range: P12M 
+
+{% set has_unblended_cost = 'line_item_unblended_cost' in columns %}
+{% set has_usage_amount  = 'line_item_usage_amount'  in columns %}
+{% set has_product_name  = 'product_product_name'    in columns %}
+{% set has_region        = 'product_region_code'     in columns %}
+{% set has_usage_acct    = 'line_item_usage_account_id' in columns %}
+{% set has_cost_center   = 'cost_category_CostCenter'   in columns %}
+{% set has_effective_cost = 'reservation_effective_cost' in columns and 'savings_plan_savings_plan_effective_cost' in columns and 'line_item_unblended_cost' in columns %}
+{% set has_owner_tag = 'resource_tags_user_owner' in columns %}
+{% set has_ri_utilization_metrics = 'reservation_recurring_fee_for_usage' in columns and 'reservation_unused_recurring_fee' in columns %}
+{% set has_marketplace_metrics = 'line_item_unblended_cost' in columns and 'line_item_line_item_type' in columns and 'product_product_name' in columns %}
+{% set has_product_family = 'product_product_family' in columns %}
+{% set has_servicename = 'product_servicename' in columns %}
+
+rows:
+  - items:
+{# Goal: Understand true spend after RI / SP commitments #}
+{# Why: Budgeting & forecasting require amortized costs rather than "list-price" unblended spend. #}
+{% if has_effective_cost %}
+  - items:
+      - kpi_grid:
+          comparison: [delta, percent_change]
+          measures:
+            - total_unblended_cost
+            - total_effective_cost
+          metrics_view: {{ metrics_view }}
+          sparkline: right
+        width: 8
+{% endif %}
+
+
+{# Goal: Understand spend by product family #}
+{# Why: High-level view of where costs are concentrated #}
+{% if has_product_family and has_unblended_cost %}
+      - pie_chart:
+          color:
+            field: product_product_family
+            limit: 10
+            type: nominal
+          innerRadius: 50
+          measure:
+            field: total_unblended_cost
+            type: quantitative
+          metrics_view: {{ metrics_view }}
+          title: Spend by Product Family
+        width: 4
+    
+{% endif %}
+
+{# Goal: Understand spend by service name #}
+{# Why: Granular view of service costs #}
+{% if has_servicename and has_unblended_cost %}
+  
+      - pie_chart:
+          color:
+            field: product_servicename
+            limit: 10
+            type: nominal
+          innerRadius: 50
+          measure:
+            field: total_unblended_cost
+            type: quantitative
+          metrics_view: {{ metrics_view }}
+          title: Spend by Service Name
+        width: 4
+    height: 300px
+{% endif %}
+
+
+
+{# Goal: Spot which AWS services are driving changes over time #}
+{# Why: Guides optimization work (e.g., focus on S3 vs. EC2) #}
+{% if has_product_name and has_unblended_cost %}
+  - items:
+      - line_chart:
+          color:
+            field: product_product_name
+            type: nominal
+          metrics_view: {{ metrics_view }}
+          x:
+            field: {{ timeseries }}
+            type: temporal
+          y:
+            field: total_unblended_cost
+            type: quantitative
+            zeroBasedOrigin: true
+          title: Cost Over Time by Service
+        width: 12
+    height: 300px
+{% endif %}
+
+{# Goal: Identify geographical concentration & expensive Regions #}
+{# Why: Enables placement or savings-plan purchases in cheaper Regions #}
+{% if has_region and has_unblended_cost %}
+  - items:
+      - bar_chart:
+          metrics_view: {{ metrics_view }}
+          color:
+            field: product_region_code
+            type: nominal
+          x:
+            field: product_region_code
+            type: nominal
+          y:
+            field: total_unblended_cost
+            type: quantitative
+          title: Cost by AWS Region
+        width: 6
+    height: 300px
+{% endif %}
+
+{# Goal: Allocate spend to business units via user-defined tags #}
+{# Why: Charge-back & accountability; highlights un-tagged resources #}
+{% if has_owner_tag and has_unblended_cost %}
+  - items:
+      - stacked_bar:
+          metrics_view: {{ metrics_view }}
+          x:
+            field: {{ timeseries }}
+            type: temporal
+          y:
+            field: total_unblended_cost
+            type: quantitative
+          color:
+            field: resource_tags_user_owner
+            type: nominal
+          title: Spend by Cost-Center Tag (stacked)
+        width: 12
+    height: 300px
+{% endif %}
+
+{# Goal: Track efficiency (e.g., $/GB, $/vCPU-hr) #}
+{# Why: Raw cost alone may rise with usage; this normalizes for growth. #}
+{% if has_unblended_cost and has_usage_amount %}
+  - items:
+      - line_chart:
+          metrics_view: {{ metrics_view }}
+          x:
+            field: {{ timeseries }}
+            type: temporal
+          y:
+            field: cost_per_unit
+            type: quantitative
+          title: Unit Economics Trend ($ per usage-unit)
+        width: 12
+    height: 300px
+{% endif %}
+
+
+{# Goal: Map spend to child accounts or environments #}
+{# Why: Multi-account orgs need per-team visibility #}
+{% if has_usage_acct and has_unblended_cost %}
+  - items:
+      - bar_chart:
+          metrics_view: {{ metrics_view }}
+          x:
+            field: line_item_usage_account_id
+            type: nominal
+          y:
+            field: total_unblended_cost
+            type: quantitative
+          color:
+            field: line_item_usage_account_id
+            type: nominal
+          title: Spend by AWS Account
+        width: 12
+    height: 300px
+{% endif %}
+
+{# Goal: Isolate spend on 3rd-party Marketplace products #}
+{# Why: Marketplace charges sometimes hide in blended totals #}
+{% if has_marketplace_metrics %}
+  - items:
+      - pie_chart:
+          metrics_view: {{ metrics_view }}
+          measure:
+            field: mp_cost
+            type: quantitative
+          color:
+            field: product_product_name
+            type: nominal
+            limit: 10
+          title: Marketplace Spend Breakdown
+        width: 6
+    height: 300px
+{% endif %}
+
+time_ranges: [PT24H, P7D, P30D, P3M, P12M]
+filters:
+  enable: true
+theme: theme

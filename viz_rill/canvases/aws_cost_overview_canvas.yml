@@ -1,0 +1,134 @@
+type: canvas
+display_name: Advanced AWS Cost Canvas
+defaults:
+  comparison_mode: time
+  time_range: P12M 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+rows:
+  - items:
+
+
+
+  - items:
+      - kpi_grid:
+          comparison: [delta, percent_change]
+          measures:
+            - total_unblended_cost
+            - total_effective_cost
+          metrics_view: aws_cost_metrics
+          sparkline: right
+        width: 8
+
+
+
+
+
+
+      - pie_chart:
+          color:
+            field: product_product_family
+            limit: 10
+            type: nominal
+          innerRadius: 50
+          measure:
+            field: total_unblended_cost
+            type: quantitative
+          metrics_view: aws_cost_metrics
+          title: Spend by Product Family
+        width: 4
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  - items:
+      - bar_chart:
+          metrics_view: aws_cost_metrics
+          color:
+            field: product_region_code
+            type: nominal
+          x:
+            field: product_region_code
+            type: nominal
+          y:
+            field: total_unblended_cost
+            type: quantitative
+          title: Cost by AWS Region
+        width: 6
+    height: 300px
+
+
+
+
+
+
+
+
+
+  - items:
+      - line_chart:
+          metrics_view: aws_cost_metrics
+          x:
+            field: line_item_usage_start_date
+            type: temporal
+          y:
+            field: cost_per_unit
+            type: quantitative
+          title: Unit Economics Trend ($ per usage-unit)
+        width: 12
+    height: 300px
+
+
+
+
+
+
+  - items:
+      - bar_chart:
+          metrics_view: aws_cost_metrics
+          x:
+            field: line_item_usage_account_id
+            type: nominal
+          y:
+            field: total_unblended_cost
+            type: quantitative
+          color:
+            field: line_item_usage_account_id
+            type: nominal
+          title: Spend by AWS Account
+        width: 12
+    height: 300px
+
+
+
+
+
+
+time_ranges: [PT24H, P7D, P30D, P3M, P12M]
+filters:
+  enable: true
+theme: theme

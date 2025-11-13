@@ -1,0 +1,110 @@
+# AWS Product Insights Canvas
+# Dynamic dimension analysis for AWS product attributes
+# Inspired by: https://github.com/rilldata/aws-cur-wizard
+
+type: canvas
+display_name: "AWS Product Deep Dive"
+
+defaults:
+  time_range: P12M
+  comparison_mode: time
+
+rows:
+  # ═══════════════════════════════════════════════════════════
+  # Product Family Analysis
+  # ═══════════════════════════════════════════════════════════
+  - items:
+      - leaderboard:
+          dimensions: [product_product_family]
+          measures: [total_unblended_cost]
+          num_rows: 15
+          metrics_view: aws_cost_metrics
+          title: "Top Product Families by Cost"
+        width: 6
+
+      - bar_chart:
+          metrics_view: aws_cost_metrics
+          x:
+            field: product_product_family
+            type: nominal
+            limit: 10
+          y:
+            field: total_unblended_cost
+            type: quantitative
+          color:
+            field: product_product_family
+            type: nominal
+          title: "Product Family Distribution"
+        width: 6
+    height: 300px
+
+  # ═══════════════════════════════════════════════════════════
+  # Service Name Breakdown
+  # ═══════════════════════════════════════════════════════════
+  - items:
+      - leaderboard:
+          dimensions: [product_servicename]
+          measures: [total_unblended_cost, cost_per_unit]
+          num_rows: 20
+          metrics_view: aws_cost_metrics
+          title: "Top Services by Cost"
+        width: 12
+    height: 350px
+
+  # ═══════════════════════════════════════════════════════════
+  # Usage Type Analysis
+  # ═══════════════════════════════════════════════════════════
+  - items:
+      - leaderboard:
+          dimensions: [line_item_usage_type]
+          measures: [total_unblended_cost, total_usage_amount]
+          num_rows: 20
+          metrics_view: aws_cost_metrics
+          title: "Top Usage Types"
+        width: 12
+    height: 350px
+
+  # ═══════════════════════════════════════════════════════════
+  # Operation Breakdown
+  # ═══════════════════════════════════════════════════════════
+  - items:
+      - leaderboard:
+          dimensions: [line_item_operation]
+          measures: [total_unblended_cost]
+          num_rows: 15
+          metrics_view: aws_cost_metrics
+          title: "Top Operations by Cost"
+        width: 6
+
+      - pie_chart:
+          color:
+            field: line_item_operation
+            limit: 10
+            type: nominal
+          innerRadius: 50
+          measure:
+            field: total_unblended_cost
+            type: quantitative
+          metrics_view: aws_cost_metrics
+          title: "Operations Distribution"
+        width: 6
+    height: 300px
+
+  # ═══════════════════════════════════════════════════════════
+  # Product Code vs Product Name
+  # ═══════════════════════════════════════════════════════════
+  - items:
+      - leaderboard:
+          dimensions: [line_item_product_code, product_product_name]
+          measures: [total_unblended_cost, total_usage_amount]
+          num_rows: 25
+          metrics_view: aws_cost_metrics
+          title: "Products by Code & Name"
+        width: 12
+    height: 400px
+
+time_ranges: [P7D, P30D, P3M, P6M, P12M]
+filters:
+  enable: true
+
+theme: theme
