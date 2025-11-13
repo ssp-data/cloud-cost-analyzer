@@ -22,35 +22,54 @@ FROM read_parquet('viz_rill/data/aws_costs/cur_export_test_00001/*.parquet');
 
 -- ============================================================
 
--- GCP Costs: Check for duplicates in first billing export table
--- Note: Skipped - GCP data not available yet
--- Uncomment when GCP data is exported
-/*
+-- GCP Costs: Check for duplicates in bigquery_billing_table
+-- Expected: duplicate_count = 0 (_dlt_id is unique per record)
 SELECT
   'GCP Costs' as source,
-  'gcp_billing_export_resource_v1_014CCF_84D5DF_A43BC0' as table_name,
+  'bigquery_billing_table' as table_name,
   COUNT(*) as total_rows,
-  COUNT(DISTINCT export_time) as distinct_by_export_time,
-  COUNT(*) - COUNT(DISTINCT export_time) as potential_duplicates,
+  COUNT(DISTINCT _dlt_id) as distinct_ids,
+  COUNT(*) - COUNT(DISTINCT _dlt_id) as duplicate_count,
   CASE
-    WHEN COUNT(*) = COUNT(DISTINCT export_time)
-    THEN '✓ PASS (unique by export_time)'
-    ELSE '⚠ Multiple records per export_time (may be expected)'
+    WHEN COUNT(*) - COUNT(DISTINCT _dlt_id) = 0
+    THEN '✓ PASS'
+    ELSE '✗ FAIL - Duplicates found!'
   END as status
-FROM read_parquet('viz_rill/data/gcp_costs/gcp_billing_export_resource_v1_014CCF_84D5DF_A43BC0/*.parquet')
-WHERE 1=1;
-*/
+FROM read_parquet('viz_rill/data/gcp_costs/bigquery_billing_table/*.parquet');
 
 -- ============================================================
 
--- GCP Costs: Placeholder for when data becomes available
+-- GCP Costs: Check for duplicates in labels table
+-- Expected: duplicate_count = 0 (_dlt_id is unique per label record)
 SELECT
   'GCP Costs' as source,
-  'N/A - No data yet' as table_name,
-  0 as total_rows,
-  0 as distinct_by_export_time,
-  0 as potential_duplicates,
-  'ℹ Skipped - GCP data not available' as status;
+  'bigquery_billing_table__labels' as table_name,
+  COUNT(*) as total_rows,
+  COUNT(DISTINCT _dlt_id) as distinct_ids,
+  COUNT(*) - COUNT(DISTINCT _dlt_id) as duplicate_count,
+  CASE
+    WHEN COUNT(*) - COUNT(DISTINCT _dlt_id) = 0
+    THEN '✓ PASS'
+    ELSE '✗ FAIL - Duplicates found!'
+  END as status
+FROM read_parquet('viz_rill/data/gcp_costs/bigquery_billing_table__labels/*.parquet');
+
+-- ============================================================
+
+-- GCP Costs: Check for duplicates in project ancestors table
+-- Expected: duplicate_count = 0 (_dlt_id is unique per ancestor record)
+SELECT
+  'GCP Costs' as source,
+  'bigquery_billing_table__project__ancestors' as table_name,
+  COUNT(*) as total_rows,
+  COUNT(DISTINCT _dlt_id) as distinct_ids,
+  COUNT(*) - COUNT(DISTINCT _dlt_id) as duplicate_count,
+  CASE
+    WHEN COUNT(*) - COUNT(DISTINCT _dlt_id) = 0
+    THEN '✓ PASS'
+    ELSE '✗ FAIL - Duplicates found!'
+  END as status
+FROM read_parquet('viz_rill/data/gcp_costs/bigquery_billing_table__project__ancestors/*.parquet');
 
 -- ============================================================
 
@@ -95,6 +114,7 @@ SELECT
   'Load Metadata' as source,
   'dlt_loads' as table_name,
   (SELECT COUNT(*) FROM read_json_auto('viz_rill/data/aws_costs/_dlt_loads/*.jsonl')) +
+  (SELECT COUNT(*) FROM read_json_auto('viz_rill/data/gcp_costs/_dlt_loads/*.jsonl')) +
   (SELECT COUNT(*) FROM read_json_auto('viz_rill/data/stripe_costs/_dlt_loads/*.jsonl')) as total_loads,
   'ℹ Info - Number of pipeline runs' as status;
 
@@ -121,6 +141,9 @@ SELECT
   'Summary' as check_type,
   'File Statistics' as description,
   (SELECT COUNT(*) FROM read_parquet('viz_rill/data/aws_costs/cur_export_test_00001/*.parquet')) as aws_rows,
+  (SELECT COUNT(*) FROM read_parquet('viz_rill/data/gcp_costs/bigquery_billing_table/*.parquet')) as gcp_billing_rows,
+  (SELECT COUNT(*) FROM read_parquet('viz_rill/data/gcp_costs/bigquery_billing_table__labels/*.parquet')) as gcp_labels_rows,
+  (SELECT COUNT(*) FROM read_parquet('viz_rill/data/gcp_costs/bigquery_billing_table__project__ancestors/*.parquet')) as gcp_ancestors_rows,
   (SELECT COUNT(*) FROM read_parquet('viz_rill/data/stripe_costs/balance_transaction/*.parquet')) as stripe_rows,
   (SELECT COUNT(*) FROM read_parquet('viz_rill/data/stripe_costs/event/*.parquet')) as stripe_events,
   '✓ Data available' as status;

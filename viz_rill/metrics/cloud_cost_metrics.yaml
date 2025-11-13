@@ -38,7 +38,12 @@ dimensions:
   - name: currency
     display_name: Currency
     column: currency
-    description: "Currency code"
+    description: "Currency code (normalized to USD)"
+
+  - name: original_currency
+    display_name: Original Currency
+    column: original_currency
+    description: "Original currency before conversion"
 
 measures:
   - name: total_cost
@@ -73,6 +78,6 @@ measures:
 
   - name: avg_transaction_amount
     display_name: "Avg Transaction"
-    expression: "AVG(amount)"
+    expression: "AVG(amount_usd)"
     description: "Average transaction amount"
     format_preset: currency_usd
