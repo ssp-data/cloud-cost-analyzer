@@ -146,6 +146,7 @@ bucket_url = "s3://your-bucket-name"  # Your S3 bucket
 file_glob = "cur/your-report-name/data/**/*.parquet"  # Path to your CUR files
 table_name = "your_table_name"  # Name for the output table
 dataset_name = "aws_costs"  # Dataset name (default: aws_costs)
+initial_start_date = "2025-09-01"  # Only load data from this date onwards (filters by file modification date)
 
 # GCP BigQuery billing export configuration
 [sources.gcp_billing]
@@ -155,6 +156,7 @@ dataset_name = "aws_costs"  # Dataset name (default: aws_costs)
 # project_id = "your-gcp-project-id"
 dataset = "billing_export"  # BigQuery dataset name
 dataset_name = "gcp_costs"  # Output dataset name (default: gcp_costs)
+initial_start_date = "2025-09-01T00:00:00Z"  # Only load data from this date onwards (filters by export_time)
 # Update these table names to match your GCP billing export tables
 # Find them in BigQuery Console under your billing_export dataset
 table_names = [
@@ -165,7 +167,22 @@ table_names = [
 # Stripe configuration
 [sources.stripe]
 dataset_name = "stripe_costs"  # Dataset name (default: stripe_costs)
+initial_start_date = "2025-09-01"  # Only load data from this date onwards (filters by created timestamp)
 ```
+
+**Understanding `initial_start_date` Configuration:**
+
+The `initial_start_date` parameter controls how far back to load historical data when running the pipeline for the first time. This is especially important when copying this project to avoid loading 10+ years of historical data:
+
+- **AWS**: Filters files by modification date. Format: `"YYYY-MM-DD"` (e.g., `"2025-09-01"`)
+- **GCP**: Filters records by `export_time` field. Format: `"YYYY-MM-DDTHH:MM:SSZ"` (e.g., `"2025-09-01T00:00:00Z"`)
+- **Stripe**: Filters transactions by created timestamp. Format: `"YYYY-MM-DD"` (e.g., `"2025-09-01"`)
+
+**Important Notes:**
+- Once data is loaded, subsequent runs only load new data (incremental loading)
+- To reset and reload from a different start date, run `make dlt-clear` to clear the dlt state
+- If omitted, AWS/Stripe will load all available data, and GCP will default to loading from 2000-01-01
+- Recommended: Set to a recent date (e.g., 3-6 months ago) to keep initial data load manageable
 
 **How to find your GCP billing table names:**
 1. Go to [BigQuery Console](https://console.cloud.google.com/bigquery)

@@ -26,6 +26,7 @@ bucket_url = "s3://cost-analysis-demo-sspaeti"
 file_glob = "cur/CUR-export-test/data/**/*.parquet"
 table_name = "cur_export_test_00001"
 dataset_name = "aws_costs"
+initial_start_date = "2025-09-01"  # Only load data from this date onwards (filters by file modification date)
 
 # GCP BigQuery billing export configuration
 [sources.gcp_billing]
@@ -34,6 +35,7 @@ dataset_name = "aws_costs"
 # project_id = "testing-bigquery-220511"
 dataset = "billing_export"
 dataset_name = "gcp_costs"
+initial_start_date = "2025-09-01T00:00:00Z"  # Only load data from this date onwards (filters by export_time)
 # Update these table names to match your GCP billing export tables
 # Find them in BigQuery Console under your billing_export dataset
 table_names = [
@@ -44,3 +46,4 @@ table_names = [
 # Stripe configuration
 [sources.stripe]
 dataset_name = "stripe_costs"
+initial_start_date = "2025-09-01"  # Only load data from this date onwards (filters by created timestamp)

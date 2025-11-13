@@ -84,6 +84,8 @@ def load_incremental_endpoints(
         end_date: An optional end date to limit the data retrieved.
                   Defaults to None. Format: datetime(YYYY, MM, DD).
     """
+    from pendulum import datetime
+
     # Load configuration from config.toml
     try:
         pipeline_name = dlt.config["pipeline.pipeline_name"]
@@ -94,6 +96,16 @@ def load_incremental_endpoints(
         dataset_name = dlt.config["sources.stripe.dataset_name"]
     except KeyError:
         dataset_name = "stripe_costs"
+
+    # Get initial start date from config if not provided (optional)
+    if initial_start_date is None:
+        try:
+            initial_start_date_str = dlt.config["sources.stripe.initial_start_date"]
+            # Parse the date string into datetime format
+            parts = initial_start_date_str.split('-')
+            initial_start_date = datetime(int(parts[0]), int(parts[1]), int(parts[2]))
+        except KeyError:
+            pass  # Keep as None if not in config
 
     # Using filesystem destination to write parquet files for Rill
     pipeline = dlt.pipeline(

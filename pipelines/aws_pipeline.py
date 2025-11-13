@@ -25,11 +25,19 @@ if __name__ == "__main__":
     except KeyError:
         pipeline_name = "cloud_cost_analytics"
 
-    # Configure filesystem resource
+    # Get initial start date from config (optional)
+    try:
+        from dlt.common import pendulum
+        initial_start_date_str = dlt.config["sources.aws_cur.initial_start_date"]
+        initial_start_date = pendulum.parse(initial_start_date_str)
+    except KeyError:
+        initial_start_date = None
+
+    # Configure filesystem resource with optional start date
     filesystem_resource = filesystem(
         bucket_url=bucket_url,
         file_glob=file_glob,
-        incremental=dlt.sources.incremental("modification_date"),
+        incremental=dlt.sources.incremental("modification_date", initial_value=initial_start_date),
     )
 
     # Pipe to parquet reader
