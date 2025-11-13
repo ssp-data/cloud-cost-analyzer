@@ -1,179 +1,159 @@
-# Cloud Cost Analytics with Rill
+# Rill Cost Analytics Dashboards
 
-Multi-cloud cost analytics dashboard combining AWS Cost and Usage Reports (CUR), GCP billing data, and Stripe revenue metrics into a unified analytics platform.
+Multi-cloud cost visualization combining AWS, GCP, and Stripe data using Rill.
 
 ## Quick Start
 
 ```bash
-cd viz_rill
-rill start
+make serve  # Opens Rill at http://localhost:9009
 ```
 
-Rill will build your project from data sources to dashboards and launch in your browser.
-
-## Overview
-
-This project provides comprehensive cost analytics across multiple cloud providers and revenue sources:
-
-- **AWS Costs**: Full AWS Cost and Usage Report (CUR) analysis with RI/SP tracking
-- **GCP Costs**: Google Cloud Platform billing data (via BigQuery export)
-- **Stripe Revenue**: Payment processing fees and revenue tracking
-
-The dashboards are designed for engineering, finance, and operations teams to:
-- Track multi-cloud spending trends
-- Optimize Reserved Instance (RI) and Savings Plan (SP) utilization
-- Analyze gross margins (revenue vs. cloud costs)
-- Identify cost anomalies and optimization opportunities
-
-## Data Model
-
-### Unified Cost Model
-Combines all cost and revenue sources into a star schema:
-
-**Dimensions:**
-- Cloud Provider (AWS, GCP, Stripe)
-- Service/Product Name
-- Region
-- Account ID
-- Transaction Type (cost, revenue, fee)
-
-**Metrics:**
-- Total Cost & Revenue
-- Net Margin & Gross Margin %
-- Cost per Unit (efficiency tracking)
-
-### AWS-Specific Model
-Direct access to AWS CUR data with full fidelity:
-
-**Key Dimensions:**
-- Product Family, Service Name, Product Code
-- Region, Availability Zone
-- Usage Account, Payer Account
-- Usage Type, Operation
-- Pricing Term (On-Demand, Reserved, Spot)
-
-**Key Metrics:**
-- Unblended Cost (list price)
-- Blended Cost (averaged across accounts)
-- **Effective Cost** (RI/SP amortized)
-- On-Demand Cost (for comparison)
-- RI/SP Savings & Utilization
-- Unit Economics (cost per usage unit)
-- Marketplace Spend
-
-## Dashboards
-
-### 1. Cloud Cost Analytics (`cloud_cost_explore.yaml`)
-Overall multi-cloud cost and revenue analysis with margin tracking.
-
-### 2. AWS Cost Analytics (`aws_overview.yaml`)
-**Advanced AWS-specific dashboard** featuring:
-- Effective Cost vs. Unblended Cost comparison
-- RI/SP savings tracking
-- Regional cost distribution
-- Multi-account breakdown
-- Unit economics trends
-- RI utilization monitoring
-- Marketplace spend isolation
-
-Inspired by best practices from [aws-cur-wizard](https://github.com/rilldata/aws-cur-wizard).
-
-### 3. AWS Cost Explorer (`aws_explore.yaml`)
-Interactive drill-down interface for ad-hoc AWS cost analysis.
-
-### 4. AWS Product Deep Dive (`aws_product_insights.yaml`)
-Detailed product, service, and usage type analysis with leaderboards.
-
-## Data Pipeline
-
-Data is ingested using [dlt (data load tool)](https://dlthub.com/):
-
-```bash
-# Run pipelines (from project root)
-make run-aws      # AWS CUR → Parquet
-make run-gcp      # GCP BigQuery → Parquet
-make run-stripe   # Stripe → Parquet
-```
-
-Parquet files are written to `viz_rill/data/`:
-- `aws_costs/` - AWS CUR data
-- `gcp_costs/` - GCP billing data
-- `stripe_costs/` - Stripe transaction data
-
-## Advanced AWS Analytics
-
-This project incorporates sophisticated AWS cost analysis techniques from [aws-cur-wizard](https://github.com/rilldata/aws-cur-wizard), including:
-
-### Effective Cost Calculation
-AWS billing has multiple cost types:
-- **Unblended Cost**: List price (what you'd pay without commitments)
-- **Blended Cost**: Averaged across accounts in an organization
-- **Effective Cost**: True cost after RI/SP amortization
-
-The dashboards show **Effective Cost** to give you the real financial picture.
-
-### RI/SP Utilization Tracking
-Monitor Reserved Instance and Savings Plan efficiency:
-- Recurring fees (used capacity)
-- Unused fees (wasted spend)
-- Utilization percentage
-- Savings vs. on-demand pricing
-
-### Unit Economics
-Track cost efficiency over time:
-```
-Cost per Unit = Total Cost / Total Usage Amount
-```
-Helps identify whether cost increases are due to inefficiency or business growth.
-
-### Marketplace Spend
-Isolate 3rd-party AWS Marketplace charges that often hide in blended totals.
-
-## Project Structure
+## Structure
 
 ```
 viz_rill/
-├── sources/
-│   ├── aws_cost_normalized.yaml    # AWS CUR source with date extraction
-│   └── (unified source - TBD)
-├── metrics/
-│   ├── aws_cost_metrics.yaml       # AWS-specific metrics with RI/SP tracking
-│   └── cloud_cost_metrics.yaml     # Multi-cloud metrics
-├── dashboards/
-│   ├── aws_overview.yaml           # Advanced AWS analytics canvas
+├── dashboards/              # Static dashboards (always work)
+│   ├── aws_overview.yaml           # AWS cost analytics + RI/SP tracking
 │   ├── aws_explore.yaml            # Interactive AWS explorer
-│   ├── aws_product_insights.yaml   # Product dimension deep dive
+│   ├── aws_product_insights.yaml   # Product dimension analysis
 │   └── cloud_cost_explore.yaml     # Multi-cloud overview
-├── models/
-│   ├── aws_costs.sql               # AWS cost model
-│   ├── stripe_revenue.sql          # Stripe revenue model
-│   └── unified_cost_model.sql      # Combined star schema
-├── scripts/
-│   ├── normalize_aws.py            # AWS data normalization
-│   ├── generate_aws_dashboards.py  # Dynamic dashboard generation
-│   └── utils/
-│       └── dimension_chart_selector.py  # Chart selection algorithm
-├── templates/                      # Jinja2 templates for dynamic generation
-└── data/                           # Parquet files (gitignored)
+├── sources/                 # Data sources
+│   └── aws_cost_normalized.yaml    # AWS CUR (queries parquet directly)
+├── metrics/                 # Metric definitions
+│   ├── aws_cost_metrics.yaml       # 20+ AWS-specific measures
+│   └── cloud_cost_metrics.yaml     # Multi-cloud metrics
+├── models/                  # SQL transformations
+│   ├── aws_costs.sql
+│   ├── stripe_revenue.sql
+│   └── unified_cost_model.sql
+├── data/                    # Parquet files (gitignored)
+├── aws-cur-wizard/          # Scripts & templates from aws-cur-wizard
+│   ├── scripts/                    # Python generators
+│   └── templates/                  # Jinja2 templates
+├── canvases/                # Generated dashboards (optional, gitignored)
+└── explores/                # Generated explorers (optional, gitignored)
 ```
 
-## Acknowledgements
+## How It Works
 
-AWS cost analytics capabilities inspired by and adapted from:
-- **[aws-cur-wizard](https://github.com/rilldata/aws-cur-wizard)** by [Rill Data](https://github.com/rilldata)
-- Special thanks to the Rill team for demonstrating best practices in CUR analysis
+### Static Dashboards (Default)
 
-The dimension chart selector algorithm, Jinja2 templates, and effective cost calculation patterns are based on their work.
+Our hand-crafted dashboards query raw parquet files directly via SQL:
 
-## License
+```
+data/aws_costs/*.parquet
+  ↓
+sources/aws_cost_normalized.yaml (SQL query)
+  ↓
+metrics/aws_cost_metrics.yaml (20+ measures)
+  ↓
+dashboards/*.yaml (visualizations)
+```
 
-This project builds upon techniques from aws-cur-wizard (Apache 2.0 License).
-See individual file headers for attribution details.
+**No preprocessing needed** - just run `make serve`!
 
-## Future Enhancements
+### Dynamic Dashboards (Optional)
 
-- [ ] GCP-specific dashboards with committed use discount tracking
-- [ ] Dynamic canvas generation for resource tags (when tags are added to AWS export)
-- [ ] Budget tracking and forecasting
-- [ ] Anomaly detection alerts
-- [ ] Multi-cloud cost comparison canvas
+Using aws-cur-wizard scripts to auto-generate dimension-specific canvases:
+
+```bash
+make aws-dashboards  # Analyzes your data, generates custom canvases
+make serve          # View static + generated dashboards
+```
+
+This creates additional dashboards in `canvases/` and `explores/` folders based on your data's dimensions.
+
+## Two Approaches
+
+| Approach | Files | When to Use |
+|----------|-------|-------------|
+| **Static** | `dashboards/` | Daily use - fast, version controlled, works immediately |
+| **Dynamic** | `canvases/`, `explores/` | When you add resource tags or need dimension analysis |
+
+Both work together - you can use static dashboards alone or add dynamic generation for advanced analysis.
+
+## aws-cur-wizard Integration
+
+The `aws-cur-wizard/` folder contains scripts and templates from [aws-cur-wizard](https://github.com/Twing-Data/aws-cur-wizard) (MIT License) for dynamic dashboard generation.
+
+**What it does**:
+- Analyzes AWS CUR data schema
+- Intelligently selects chart types based on cardinality
+- Generates dimension-specific canvases
+- Handles resource tags elegantly
+
+**When you run** `make aws-dashboards`:
+1. `normalize.py` - Flattens AWS data → `data/normalized_aws.parquet`
+2. `generate_rill_yaml.py` - Analyzes schema, renders Jinja2 templates
+3. Outputs YAML files → `canvases/`, `explores/`
+
+See `aws-cur-wizard/README.md` for detailed attribution and how the algorithm works.
+
+## Key Features
+
+### Static Dashboards Provide:
+- Effective Cost (RI/SP amortized)
+- RI Utilization tracking
+- Regional cost distribution
+- Multi-account breakdown
+- Unit economics
+- Marketplace spend isolation
+- Multi-cloud support (AWS + GCP + Stripe)
+
+### Dynamic Generation Adds:
+- Automatic chart type selection
+- Dominant value detection (shows top spenders as KPIs)
+- Tag-specific canvases
+- Adapts to schema changes
+
+## Data Flow
+
+```
+dlt Pipelines                    Rill Sources
+pipelines/                       sources/
+  ├── aws_pipeline.py      →→    ├── aws_cost_normalized.yaml
+  ├── google_bq_*.py       →→    ├── (future: gcp_source.yaml)
+  └── stripe_pipeline.py   →→    └── (unified in models/)
+        ↓                              ↓
+    Parquet files                 SQL queries
+    data/*/                           ↓
+                                  Metrics & Dashboards
+                                  metrics/, dashboards/
+```
+
+## Generated vs Static Files
+
+**In Git** (version controlled):
+- `dashboards/` - Our static dashboards
+- `sources/` - Data source queries
+- `metrics/` - Metric definitions
+- `models/` - SQL transformations
+- `aws-cur-wizard/` - Generator scripts & templates
+
+**Generated** (gitignored, recreated on demand):
+- `canvases/` - Auto-generated dimension canvases
+- `explores/` - Auto-generated explorers
+- `data/normalized_aws.parquet` - Intermediate file for generator
+
+## Commands
+
+```bash
+# View dashboards
+make serve
+
+# Generate dynamic dashboards
+make aws-dashboards
+
+# List available cost columns
+make aws-list-cost-cols
+
+# Complete workflow (ETL + dashboards)
+make run-all
+```
+
+## Attribution
+
+**Static dashboards**: Created for this project, inspired by aws-cur-wizard patterns
+**Dynamic generation**: Uses [aws-cur-wizard](https://github.com/Twing-Data/aws-cur-wizard) scripts and templates
+
+See `../ATTRIBUTION.md` for complete third-party attribution.
