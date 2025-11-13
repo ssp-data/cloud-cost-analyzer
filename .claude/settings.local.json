@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(duckdb:*)",
-      "Bash(rill start:*)"
+      "Bash(rill start:*)",
+      "Bash(pkill:*)",
+      "Bash(make run-stripe:*)",
+      "Bash(make run-aws:*)",
+      "Bash(tree:*)",
+      "Bash(timeout 10 rill start:*)"
     ],
     "deny": [],
     "ask": []
