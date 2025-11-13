@@ -30,7 +30,7 @@ if __name__ == "__main__":
         pipeline_name="cloud_cost_analytics",
         destination="filesystem",
         dataset_name="aws_costs",
-        export_schema_path="exported_schema/aws_cost_schema.json",
+        # export_schema_path="exported_schema/aws_cost_schema.json",
     )
 
     # Load the data with merge mode and composite primary key for deduplication

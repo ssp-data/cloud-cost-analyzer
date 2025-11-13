@@ -58,7 +58,7 @@ def load_standalone_table_resource() -> None:
         pipeline_name="cloud_cost_analytics",
         destination="filesystem",
         dataset_name="gcp_costs",
-        export_schema_path="exported_schema/google_cost_schema.json"
+        # export_schema_path="exported_schema/google_cost_schema.json"
     )
 
     # Define the two billing tables to load

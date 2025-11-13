@@ -31,7 +31,7 @@ def load_data(
         pipeline_name="cloud_cost_analytics",
         destination="filesystem",
         dataset_name="stripe_costs",
-        export_schema_path="exported_schema/stripe_cost_schema.json",
+        # export_schema_path="exported_schema/stripe_cost_schema.json",
     )
     source = stripe_source(
         endpoints=endpoints, start_date=start_date, end_date=end_date
@@ -68,7 +68,7 @@ def load_incremental_endpoints(
         pipeline_name="cloud_cost_analytics",
         destination="filesystem",
         dataset_name="stripe_costs",
-        export_schema_path="exported_schema/stripe_cost_schema.json",
+        # export_schema_path="exported_schema/stripe_cost_schema.json",
     )
     # load all data on the first run that created before end_date
     source = incremental_stripe_source(
