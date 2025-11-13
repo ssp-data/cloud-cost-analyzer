@@ -25,9 +25,10 @@ if __name__ == "__main__":
     filesystem_pipe = filesystem_resource | read_parquet()
 
     # Create pipeline with appropriate naming
+    # Using filesystem destination to write parquet files for Rill
     pipeline = dlt.pipeline(
         pipeline_name="cloud_cost_analytics",
-        destination="duckdb",
+        destination="filesystem",
         dataset_name="aws_costs",
         export_schema_path="exported_schema/aws_cost_schema.json",
     )
@@ -41,7 +42,8 @@ if __name__ == "__main__":
         write_disposition="merge",
         merge_key=["identity_line_item_id", "identity_time_interval"]
     )
-    load_info = pipeline.run(resource)
+    # Use loader_file_format="parquet" in run() to generate parquet files
+    load_info = pipeline.run(resource, loader_file_format="parquet")
 
     print("\n" + "="*50)
     print("Load Info:")

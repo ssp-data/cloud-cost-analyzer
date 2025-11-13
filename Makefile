@@ -8,8 +8,12 @@ dlt-clear:
 	rm -rf ~/.local/share/dlt/
 
 clear-data:
-	mv cloud_cost_analytics.duckdb cloud_cost_analytics.bak_$(shell date +%Y%m%d_%H%M%S).duckdb
-	
+	@if [ -f cloud_cost_analytics.duckdb ]; then \
+		mv cloud_cost_analytics.duckdb cloud_cost_analytics.bak_$(shell date +%Y%m%d_%H%M%S).duckdb; \
+	fi
+	rm -rf viz_rill/data
+	mkdir -p viz_rill/data
+
 clear: dlt-clear clear-data
 
 
@@ -17,7 +21,7 @@ clear: dlt-clear clear-data
 run-aws:
 	uv run python pipelines/aws_pipeline.py
 	echo "####################################################################"
-run-bq:
+run-gcp:
 	uv run python pipelines/google_bq_incremental_pipeline.py
 	echo "####################################################################"
 run-stripe:
@@ -27,7 +31,7 @@ run-stripe:
 
 
 
-run-all: run-aws run-bq run-stripe
+run-all: run-aws run-gcp run-stripe
 
 test-duplicates:
 	@echo "Running duplicate checks on cloud_cost_analytics.duckdb..."

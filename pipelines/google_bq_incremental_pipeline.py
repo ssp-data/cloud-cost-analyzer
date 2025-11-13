@@ -52,10 +52,11 @@ def bigquery_billing_table(
 def load_standalone_table_resource() -> None:
     """Load BigQuery billing export tables into DuckDB"""
 
-    # Create pipeline to load into local DuckDB
+    # Create pipeline to write parquet files for Rill
+    # Using filesystem destination to write parquet files
     pipeline = dlt.pipeline(
         pipeline_name="cloud_cost_analytics",
-        destination='duckdb',
+        destination="filesystem",
         dataset_name="gcp_costs",
         export_schema_path="exported_schema/google_cost_schema.json"
     )
@@ -71,7 +72,8 @@ def load_standalone_table_resource() -> None:
 
     # Run the pipeline with incremental (append) write disposition
     # This will only load new records based on export_time
-    info = pipeline.run(resources)
+    # Use loader_file_format="parquet" in run() to generate parquet files
+    info = pipeline.run(resources, loader_file_format="parquet")
     print(info)
     print(f"\nSuccessfully loaded {len(table_names)} tables to DuckDB (incremental)")
     print(pipeline.default_schema.to_pretty_yaml())

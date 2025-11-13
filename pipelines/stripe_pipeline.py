@@ -26,16 +26,18 @@ def load_data(
         start_date: An optional start date to limit the data retrieved. Defaults to None.
         end_date: An optional end date to limit the data retrieved. Defaults to None.
     """
+    # Using filesystem destination to write parquet files for Rill
     pipeline = dlt.pipeline(
         pipeline_name="cloud_cost_analytics",
-        destination="duckdb",
+        destination="filesystem",
         dataset_name="stripe_costs",
         export_schema_path="exported_schema/stripe_cost_schema.json",
     )
     source = stripe_source(
         endpoints=endpoints, start_date=start_date, end_date=end_date
     )
-    load_info = pipeline.run(source)
+    # Use loader_file_format="parquet" in run() to generate parquet files
+    load_info = pipeline.run(source, loader_file_format="parquet")
     print(load_info)
 
 
@@ -61,9 +63,10 @@ def load_incremental_endpoints(
         end_date: An optional end date to limit the data retrieved.
                   Defaults to None. Format: datetime(YYYY, MM, DD).
     """
+    # Using filesystem destination to write parquet files for Rill
     pipeline = dlt.pipeline(
         pipeline_name="cloud_cost_analytics",
-        destination="duckdb",
+        destination="filesystem",
         dataset_name="stripe_costs",
         export_schema_path="exported_schema/stripe_cost_schema.json",
     )
@@ -73,7 +76,8 @@ def load_incremental_endpoints(
         initial_start_date=initial_start_date,
         end_date=end_date,
     )
-    load_info = pipeline.run(source)
+    # Use loader_file_format="parquet" in run() to generate parquet files
+    load_info = pipeline.run(source, loader_file_format="parquet")
     print(load_info)
 
     # # load nothing, because incremental loading and end date limit

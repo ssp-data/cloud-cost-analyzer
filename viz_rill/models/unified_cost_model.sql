@@ -14,7 +14,7 @@ WITH aws_cost_data AS (
     line_item_unblended_cost AS amount,
     'cost' AS transaction_type,
     line_item_currency_code AS currency
-  FROM aws_costs
+  FROM {{ ref "aws_costs" }}
 ),
 
 -- Stripe Revenue
@@ -38,7 +38,7 @@ stripe_revenue_data AS (
       ELSE type
     END AS transaction_type,
     UPPER(currency) AS currency
-  FROM stripe_revenue
+  FROM {{ ref "stripe_revenue" }}
 )
 
 -- Union all sources
