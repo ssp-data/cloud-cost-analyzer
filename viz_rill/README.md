@@ -144,9 +144,6 @@ make serve
 # Generate dynamic dashboards
 make aws-dashboards
 
-# List available cost columns
-make aws-list-cost-cols
-
 # Complete workflow (ETL + dashboards)
 make run-all
 ```

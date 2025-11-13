@@ -64,13 +64,6 @@ aws-generate-dashboards:
 aws-dashboards: aws-normalize aws-generate-dashboards
 	@echo "✅ AWS dashboards generated! Run 'make serve' to view them."
 
-aws-list-cost-cols:
-	@echo "Available cost columns in AWS data:"
-	cd viz_rill && uv run python aws-cur-wizard/scripts/generate_rill_yaml.py \
-		--parquet data/normalized_aws.parquet \
-		--output-dir . \
-		--list-cost-columns
-
 #what this does:
 # 1. load data incrementally
 # 2. normalzes aws cost reports and generates Rill dashboards

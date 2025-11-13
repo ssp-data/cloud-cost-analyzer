@@ -27,9 +27,6 @@ make
   # Generate dynamic dashboards (optional)
   make aws-dashboards
 
-  # List available cost columns
-  make aws-list-cost-cols
-
   # Complete workflow
   make run-all
 ```
