@@ -29,9 +29,9 @@ run-stripe:
 	echo "####################################################################"
 
 
+#run dlt incremental loads
+run-etl: run-aws run-gcp run-stripe
 
-
-run-all: run-aws run-gcp run-stripe
 
 test-duplicates-duckdb:
 	@echo "Running duplicate checks on cloud_cost_analytics.duckdb..."
@@ -50,11 +50,11 @@ serve:
 ## AWS-Specific Advanced Analytics (aws-cur-wizard integration)
 aws-normalize:
 	@echo "Normalizing AWS CUR data..."
-	cd viz_rill && uv run python scripts/normalize.py
+	cd viz_rill && uv run python aws-cur-wizard/scripts/normalize.py
 
 aws-generate-dashboards:
 	@echo "Generating AWS-specific Rill dashboards..."
-	cd viz_rill && uv run python scripts/generate_rill_yaml.py \
+	cd viz_rill && uv run python aws-cur-wizard/scripts/generate_rill_yaml.py \
 		--parquet data/normalized_aws.parquet \
 		--output-dir . \
 		--cost-col line_item_unblended_cost \
@@ -66,7 +66,13 @@ aws-dashboards: aws-normalize aws-generate-dashboards
 
 aws-list-cost-cols:
 	@echo "Available cost columns in AWS data:"
-	cd viz_rill && uv run python scripts/generate_rill_yaml.py \
+	cd viz_rill && uv run python aws-cur-wizard/scripts/generate_rill_yaml.py \
 		--parquet data/normalized_aws.parquet \
 		--output-dir . \
 		--list-cost-columns
+
+#what this does:
+# 1. load data incrementally
+# 2. normalzes aws cost reports and generates Rill dashboards
+# 3. starts Rill BI and opens in browser
+run-all: run-etl aws-normalize serve

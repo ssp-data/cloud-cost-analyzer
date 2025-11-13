@@ -13,7 +13,8 @@
       "Bash(python scripts/normalize_aws.py:*)",
       "Bash(uv add:*)",
       "Bash(make:*)",
-      "Bash(timeout 20 rill start:*)"
+      "Bash(timeout 20 rill start:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []
