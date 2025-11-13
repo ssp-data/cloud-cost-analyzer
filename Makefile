@@ -33,9 +33,15 @@ run-stripe:
 
 run-all: run-aws run-gcp run-stripe
 
-test-duplicates:
+test-duplicates-duckdb:
 	@echo "Running duplicate checks on cloud_cost_analytics.duckdb..."
 	@duckdb cloud_cost_analytics.duckdb < tests/test_duplicates.sql
+
+test-duplicates:
+	@echo "Running duplicate checks on parquet files in viz_rill/data..."
+	@duckdb < tests/test_duplicates_parquet.sql
+
+test: test-duplicates
 
 
 serve:

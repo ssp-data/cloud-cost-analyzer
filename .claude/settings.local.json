@@ -7,7 +7,8 @@
       "Bash(make run-stripe:*)",
       "Bash(make run-aws:*)",
       "Bash(tree:*)",
-      "Bash(timeout 10 rill start:*)"
+      "Bash(timeout 10 rill start:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,128 @@
+-- ============================================================
+-- Duplicate Check Queries for Cloud Cost Analytics (Parquet Files)
+-- ============================================================
+-- Run these queries to verify no duplicates exist in the parquet data
+-- Expected: duplicate_count should be 0 for all queries
+-- ============================================================
+
+-- AWS Costs: Check for duplicates using composite primary key
+-- Expected: duplicate_count = 0
+SELECT
+  'AWS Costs' as source,
+  'cur_export_test_00001' as table_name,
+  COUNT(*) as total_rows,
+  COUNT(DISTINCT (identity_line_item_id, identity_time_interval)) as distinct_records,
+  COUNT(*) - COUNT(DISTINCT (identity_line_item_id, identity_time_interval)) as duplicate_count,
+  CASE
+    WHEN COUNT(*) - COUNT(DISTINCT (identity_line_item_id, identity_time_interval)) = 0
+    THEN '✓ PASS'
+    ELSE '✗ FAIL - Duplicates found!'
+  END as status
+FROM read_parquet('viz_rill/data/aws_costs/cur_export_test_00001/*.parquet');
+
+-- ============================================================
+
+-- GCP Costs: Check for duplicates in first billing export table
+-- Note: Skipped - GCP data not available yet
+-- Uncomment when GCP data is exported
+/*
+SELECT
+  'GCP Costs' as source,
+  'gcp_billing_export_resource_v1_014CCF_84D5DF_A43BC0' as table_name,
+  COUNT(*) as total_rows,
+  COUNT(DISTINCT export_time) as distinct_by_export_time,
+  COUNT(*) - COUNT(DISTINCT export_time) as potential_duplicates,
+  CASE
+    WHEN COUNT(*) = COUNT(DISTINCT export_time)
+    THEN '✓ PASS (unique by export_time)'
+    ELSE '⚠ Multiple records per export_time (may be expected)'
+  END as status
+FROM read_parquet('viz_rill/data/gcp_costs/gcp_billing_export_resource_v1_014CCF_84D5DF_A43BC0/*.parquet')
+WHERE 1=1;
+*/
+
+-- ============================================================
+
+-- GCP Costs: Placeholder for when data becomes available
+SELECT
+  'GCP Costs' as source,
+  'N/A - No data yet' as table_name,
+  0 as total_rows,
+  0 as distinct_by_export_time,
+  0 as potential_duplicates,
+  'ℹ Skipped - GCP data not available' as status;
+
+-- ============================================================
+
+-- Stripe Costs: Check for duplicates in events table
+-- Expected: duplicate_count = 0 (events have unique IDs)
+SELECT
+  'Stripe Costs' as source,
+  'event' as table_name,
+  COUNT(*) as total_rows,
+  COUNT(DISTINCT id) as distinct_ids,
+  COUNT(*) - COUNT(DISTINCT id) as duplicate_count,
+  CASE
+    WHEN COUNT(*) - COUNT(DISTINCT id) = 0
+    THEN '✓ PASS'
+    ELSE '✗ FAIL - Duplicates found!'
+  END as status
+FROM read_parquet('viz_rill/data/stripe_costs/event/*.parquet');
+
+-- ============================================================
+
+-- Stripe Costs: Check for duplicates in balance_transaction table
+-- Expected: duplicate_count = 0 (transactions have unique IDs)
+SELECT
+  'Stripe Costs' as source,
+  'balance_transaction' as table_name,
+  COUNT(*) as total_rows,
+  COUNT(DISTINCT id) as distinct_ids,
+  COUNT(*) - COUNT(DISTINCT id) as duplicate_count,
+  CASE
+    WHEN COUNT(*) - COUNT(DISTINCT id) = 0
+    THEN '✓ PASS'
+    ELSE '✗ FAIL - Duplicates found!'
+  END as status
+FROM read_parquet('viz_rill/data/stripe_costs/balance_transaction/*.parquet');
+
+-- ============================================================
+
+-- Check for duplicate loads across all pipelines (from dlt metadata - JSONL files)
+-- Shows how many times each pipeline has loaded data
+-- Note: dlt stores metadata in JSONL format, not parquet
+SELECT
+  'Load Metadata' as source,
+  'dlt_loads' as table_name,
+  (SELECT COUNT(*) FROM read_json_auto('viz_rill/data/aws_costs/_dlt_loads/*.jsonl')) +
+  (SELECT COUNT(*) FROM read_json_auto('viz_rill/data/stripe_costs/_dlt_loads/*.jsonl')) as total_loads,
+  'ℹ Info - Number of pipeline runs' as status;
+
+-- ============================================================
+
+-- Find actual duplicate records in AWS (if any)
+-- Run this to see which specific records are duplicated
+SELECT
+  identity_line_item_id,
+  identity_time_interval,
+  COUNT(*) as occurrence_count,
+  STRING_AGG(_dlt_load_id, ', ') as load_ids
+FROM read_parquet('viz_rill/data/aws_costs/cur_export_test_00001/*.parquet')
+GROUP BY identity_line_item_id, identity_time_interval
+HAVING COUNT(*) > 1
+ORDER BY occurrence_count DESC
+LIMIT 10;
+
+-- ============================================================
+
+-- File size and row count summary across all parquet files
+-- Useful to understand data distribution
+SELECT
+  'Summary' as check_type,
+  'File Statistics' as description,
+  (SELECT COUNT(*) FROM read_parquet('viz_rill/data/aws_costs/cur_export_test_00001/*.parquet')) as aws_rows,
+  (SELECT COUNT(*) FROM read_parquet('viz_rill/data/stripe_costs/balance_transaction/*.parquet')) as stripe_rows,
+  (SELECT COUNT(*) FROM read_parquet('viz_rill/data/stripe_costs/event/*.parquet')) as stripe_events,
+  '✓ Data available' as status;
+
+-- ============================================================

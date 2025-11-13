@@ -15,4 +15,4 @@ wheels/
 #data
 *.duckdb
 
-#viz_rill/data/
+viz_rill/data/
