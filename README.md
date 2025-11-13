@@ -7,7 +7,7 @@ Multi-cloud cost analytics platform combining AWS Cost and Usage Reports (CUR), 
 - **Multi-Cloud Cost Tracking** - AWS, GCP, and future cloud providers
 - **Revenue Integration** - Stripe payment data for margin analysis
 - **Incremental Loading** - Efficient append-only data pipeline with dlt
-- **Advanced Analytics** - RI/SP utilization, unit economics, effective cost tracking (by [aws-cur-wizard](https://github.com/Twing-Data/aws-cur-wizard)
+- **Advanced Analytics** - RI/SP utilization, unit economics, effective cost tracking (adapted from [aws-cur-wizard](https://github.com/Twing-Data/aws-cur-wizard))
 - **Dynamic Dashboards** - Powered by Rill visualizations
 
 ## How it works

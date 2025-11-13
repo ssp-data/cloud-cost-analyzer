@@ -2,7 +2,7 @@
 
 ## aws-cur-wizard
 
-**Location**: `viz_rill/aws-cur-wizard/`
+**Location**: `viz_rill/cur-wizard/` (formerly aws-cur-wizard)
 
 - **Project**: aws-cur-wizard
 - **Repository**: https://github.com/Twing-Data/aws-cur-wizard
@@ -17,6 +17,6 @@ Scripts and Jinja2 templates for dynamic AWS dashboard generation:
 
 ### Purpose
 
-Automatically generates dimension-specific Rill dashboards by analyzing AWS Cost and Usage Report data. Used when running `make aws-dashboards`.
+Automatically generates dimension-specific Rill dashboards by analyzing AWS Cost and Usage Report data. Extended to also support GCP billing exports. Used when running `make aws-dashboards` or `make gcp-dashboards`.
 
-See `viz_rill/README.md` for integration details and `viz_rill/aws-cur-wizard/README.md` for technical documentation.
+See `viz_rill/README.md` for integration details and `viz_rill/cur-wizard/README.md` for technical documentation.

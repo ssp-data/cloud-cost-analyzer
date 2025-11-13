@@ -1,6 +1,6 @@
 # AWS Cost Overview Canvas
 # Advanced analytics dashboard for AWS Cost and Usage Report
-# Inspired by: https://github.com/rilldata/aws-cur-wizard
+# Inspired by: https://github.com/rilldata/aws-cur-wizard (now integrated as cur-wizard)
 
 type: canvas
 display_name: "AWS Cost Analytics"

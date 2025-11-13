@@ -1,6 +1,6 @@
 # AWS Cost & Usage Metrics View
 # Advanced metrics for AWS Cost and Usage Report analysis
-# Inspired by: https://github.com/rilldata/aws-cur-wizard
+# Inspired by: https://github.com/rilldata/aws-cur-wizard (now integrated as cur-wizard)
 
 version: 1
 type: metrics_view

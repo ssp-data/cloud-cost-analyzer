@@ -47,14 +47,14 @@ test: test-duplicates
 serve:
 	rill start viz_rill
 
-## AWS-Specific Advanced Analytics (aws-cur-wizard integration)
+## AWS Advanced Analytics (CUR Wizard integration)
 aws-normalize:
 	@echo "Normalizing AWS CUR data..."
-	cd viz_rill && uv run python aws-cur-wizard/scripts/normalize.py
+	cd viz_rill && uv run python cur-wizard/scripts/normalize.py
 
 aws-generate-dashboards:
 	@echo "Generating AWS-specific Rill dashboards..."
-	cd viz_rill && uv run python aws-cur-wizard/scripts/generate_rill_yaml.py \
+	cd viz_rill && uv run python cur-wizard/scripts/generate_rill_yaml.py \
 		--parquet data/normalized_aws.parquet \
 		--output-dir . \
 		--cost-col line_item_unblended_cost \
@@ -64,14 +64,14 @@ aws-generate-dashboards:
 aws-dashboards: aws-normalize aws-generate-dashboards
 	@echo "✅ AWS dashboards generated! Run 'make serve' to view them."
 
-## GCP-Specific Advanced Analytics
+## GCP Advanced Analytics (CUR Wizard integration)
 gcp-normalize:
 	@echo "Normalizing GCP billing data..."
-	cd viz_rill && uv run python aws-cur-wizard/scripts/normalize_gcp.py
+	cd viz_rill && uv run python cur-wizard/scripts/normalize_gcp.py
 
 gcp-generate-dashboards:
 	@echo "Generating GCP-specific Rill dashboards..."
-	cd viz_rill && uv run python aws-cur-wizard/scripts/generate_gcp_rill_yaml.py \
+	cd viz_rill && uv run python cur-wizard/scripts/generate_gcp_rill_yaml.py \
 		--parquet data/normalized_gcp.parquet \
 		--output-dir . \
 		--cost-col cost \

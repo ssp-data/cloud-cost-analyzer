@@ -1,6 +1,6 @@
 # AWS Product Insights Canvas
 # Dynamic dimension analysis for AWS product attributes
-# Inspired by: https://github.com/rilldata/aws-cur-wizard
+# Inspired by: https://github.com/rilldata/aws-cur-wizard (now integrated as cur-wizard)
 
 type: canvas
 display_name: "AWS Product Deep Dive"

@@ -1,6 +1,6 @@
 # AWS Cost Explore Dashboard
 # Interactive exploration interface for AWS cost data
-# Inspired by: https://github.com/rilldata/aws-cur-wizard
+# Inspired by: https://github.com/rilldata/aws-cur-wizard (now integrated as cur-wizard)
 
 type: explore
 

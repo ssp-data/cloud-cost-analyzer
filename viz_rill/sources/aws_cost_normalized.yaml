@@ -1,6 +1,6 @@
 # AWS CUR Source - Normalized
 # Auto-generated source for AWS Cost and Usage Report data
-# Inspired by: https://github.com/rilldata/aws-cur-wizard
+# Inspired by: https://github.com/rilldata/aws-cur-wizard (now integrated as cur-wizard)
 
 type: source
 
