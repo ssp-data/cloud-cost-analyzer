@@ -1,0 +1,60 @@
+# GCP Cost Overview Dashboard (auto-generated)
+
+type: canvas
+display_name: "GCP Cost Overview"
+
+defaults:
+  time_range: P30D
+  comparison_mode: time
+
+rows:
+  # Top-level metrics
+  - items:
+      - big_number:
+          measure: total_cost
+          metrics_view: {{ metrics_view }}
+          title: "Total Cost"
+        width: 3
+
+      - big_number:
+          measure: record_count
+          metrics_view: {{ metrics_view }}
+          title: "Total Records"
+        width: 3
+    height: 150px
+
+  # Time series
+  - items:
+      - time_series:
+          metrics_view: {{ metrics_view }}
+          y:
+            - field: total_cost
+              type: quantitative
+          title: "Cost Over Time"
+        width: 12
+    height: 300px
+
+  # Service breakdown
+  - items:
+      - leaderboard:
+          dimensions: [service__description]
+          measures: [total_cost]
+          num_rows: 10
+          metrics_view: {{ metrics_view }}
+          title: "Top Services"
+        width: 6
+
+      - leaderboard:
+          dimensions: [project__id]
+          measures: [total_cost]
+          num_rows: 10
+          metrics_view: {{ metrics_view }}
+          title: "Top Projects"
+        width: 6
+    height: 300px
+
+time_ranges: [P7D, P30D, P3M, P6M, P12M]
+filters:
+  enable: true
+
+theme: theme

@@ -1,0 +1,123 @@
+# GCP Product Insights Dashboard
+# Deep dive into GCP services, SKUs, and resource costs
+
+type: canvas
+display_name: "GCP Product Deep Dive"
+
+defaults:
+  time_range: P12M
+  comparison_mode: time
+
+rows:
+  # ═══════════════════════════════════════════════════════════
+  # Service Analysis
+  # ═══════════════════════════════════════════════════════════
+  - items:
+      - leaderboard:
+          dimensions: [service__description]
+          measures: [total_cost]
+          num_rows: 15
+          metrics_view: {{ metrics_view }}
+          title: "Top Services by Cost"
+        width: 6
+
+      - bar_chart:
+          metrics_view: {{ metrics_view }}
+          x:
+            field: service__description
+            type: nominal
+            limit: 10
+          y:
+            field: total_cost
+            type: quantitative
+          color:
+            field: service__description
+            type: nominal
+          title: "Service Cost Distribution"
+        width: 6
+    height: 300px
+
+  # ═══════════════════════════════════════════════════════════
+  # SKU Breakdown
+  # ═══════════════════════════════════════════════════════════
+  - items:
+      - leaderboard:
+          dimensions: [sku__description]
+          measures: [total_cost, total_usage]
+          num_rows: 20
+          metrics_view: {{ metrics_view }}
+          title: "Top SKUs by Cost"
+        width: 12
+    height: 350px
+
+  # ═══════════════════════════════════════════════════════════
+  # Project Analysis
+  # ═══════════════════════════════════════════════════════════
+  - items:
+      - leaderboard:
+          dimensions: [project__id, project__name]
+          measures: [total_cost]
+          num_rows: 15
+          metrics_view: {{ metrics_view }}
+          title: "Top Projects by Cost"
+        width: 6
+
+      - pie_chart:
+          color:
+            field: project__id
+            limit: 10
+            type: nominal
+          innerRadius: 50
+          measure:
+            field: total_cost
+            type: quantitative
+          metrics_view: {{ metrics_view }}
+          title: "Project Cost Distribution"
+        width: 6
+    height: 300px
+
+  # ═══════════════════════════════════════════════════════════
+  # Location Analysis
+  # ═══════════════════════════════════════════════════════════
+  - items:
+      - leaderboard:
+          dimensions: [location__location, location__country]
+          measures: [total_cost]
+          num_rows: 20
+          metrics_view: {{ metrics_view }}
+          title: "Costs by Region"
+        width: 12
+    height: 350px
+
+  # ═══════════════════════════════════════════════════════════
+  # Cost Type Breakdown
+  # ═══════════════════════════════════════════════════════════
+  - items:
+      - leaderboard:
+          dimensions: [cost_type]
+          measures: [total_cost]
+          num_rows: 10
+          metrics_view: {{ metrics_view }}
+          title: "Costs by Type"
+        width: 6
+
+      - bar_chart:
+          metrics_view: {{ metrics_view }}
+          x:
+            field: cost_type
+            type: nominal
+          y:
+            field: total_cost
+            type: quantitative
+          color:
+            field: cost_type
+            type: nominal
+          title: "Cost Type Distribution"
+        width: 6
+    height: 300px
+
+time_ranges: [P7D, P30D, P3M, P6M, P12M]
+filters:
+  enable: true
+
+theme: theme

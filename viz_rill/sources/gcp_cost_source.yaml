@@ -2,4 +2,4 @@ type: source
 connector: duckdb
 sql: |
   SELECT *
-  FROM read_parquet('data/gcp_costs/bigquery_billing_table/*.parquet')
+  FROM read_parquet('/home/sspaeti/git/work/cost-report-analyse/cloud-cost-analyzer/viz_rill/data/normalized_gcp.parquet')

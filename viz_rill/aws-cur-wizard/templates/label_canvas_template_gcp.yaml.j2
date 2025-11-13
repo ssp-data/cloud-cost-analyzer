@@ -1,0 +1,27 @@
+# GCP Labels Canvas (auto-generated)
+
+type: canvas
+display_name: "GCP Labels Analysis"
+
+defaults:
+  time_range: P30D
+  comparison_mode: time
+
+rows:
+{%- for chart in label_charts %}
+  - items:
+      - leaderboard:
+          dimensions: [{{ chart.dimension }}]
+          measures: [{{ cost_measure }}]
+          num_rows: 15
+          metrics_view: {{ metrics_view }}
+          title: "{{ chart.dimension }}"
+        width: 12
+    height: 300px
+{%- endfor %}
+
+time_ranges: [P7D, P30D, P3M, P6M, P12M]
+filters:
+  enable: true
+
+theme: theme

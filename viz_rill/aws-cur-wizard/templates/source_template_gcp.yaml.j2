@@ -1,0 +1,5 @@
+type: source
+connector: duckdb
+sql: |
+  SELECT *
+  FROM read_parquet('{{ parquet_path }}')

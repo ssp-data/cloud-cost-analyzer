@@ -1,0 +1,67 @@
+# GCP Cost Metrics View (auto-generated)
+version: 1
+type: metrics_view
+
+display_name: GCP Cost Analytics
+model: gcp_cost_source
+timeseries: date
+smallest_time_grain: "day"
+
+dimensions:
+  - name: _dlt_parent_id
+    column: _dlt_parent_id
+  - name: billing_account_id
+    column: billing_account_id
+  - name: cost_type
+    column: cost_type
+  - name: currency
+    column: currency
+  - name: labels_goog_resource_type
+    column: labels_goog_resource_type
+  - name: location__country
+    column: location__country
+  - name: location__location
+    column: location__location
+  - name: project__id
+    column: project__id
+  - name: project__name
+    column: project__name
+  - name: project__number
+    column: project__number
+  - name: resource__global_name
+    column: resource__global_name
+  - name: resource__name
+    column: resource__name
+  - name: service__description
+    column: service__description
+  - name: service__id
+    column: service__id
+  - name: sku__description
+    column: sku__description
+  - name: sku__id
+    column: sku__id
+  - name: transaction_type
+    column: transaction_type
+  - name: usage__unit
+    column: usage__unit
+
+measures:
+  - name: total_cost
+    display_name: "Total Cost"
+    expression: "SUM(cost)"
+    format_preset: currency_usd
+
+  - name: total_usage
+    display_name: "Total Usage"
+    expression: "SUM(usage__amount)"
+    format_preset: humanize
+
+  - name: cost_per_unit
+    display_name: "Cost per Unit"
+    expression: "SUM(cost) / NULLIF(SUM(usage__amount), 0)"
+    format_preset: currency_usd
+
+  - name: record_count
+    display_name: "Record Count"
+    expression: "COUNT(*)"
+    format_preset: humanize

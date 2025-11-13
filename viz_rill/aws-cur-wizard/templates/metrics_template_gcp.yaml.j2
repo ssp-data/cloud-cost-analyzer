@@ -1,0 +1,35 @@
+# GCP Cost Metrics View (auto-generated)
+version: 1
+type: metrics_view
+
+display_name: GCP Cost Analytics
+model: {{ model }}
+timeseries: {{ timeseries }}
+smallest_time_grain: "day"
+
+dimensions:
+{%- for dim in dimensions %}
+  - name: {{ dim }}
+    column: {{ dim }}
+{%- endfor %}
+
+measures:
+  - name: total_cost
+    display_name: "Total Cost"
+    expression: "SUM(cost)"
+    format_preset: currency_usd
+
+  - name: total_usage
+    display_name: "Total Usage"
+    expression: "SUM(usage__amount)"
+    format_preset: humanize
+
+  - name: cost_per_unit
+    display_name: "Cost per Unit"
+    expression: "SUM(cost) / NULLIF(SUM(usage__amount), 0)"
+    format_preset: currency_usd
+
+  - name: record_count
+    display_name: "Record Count"
+    expression: "COUNT(*)"
+    format_preset: humanize

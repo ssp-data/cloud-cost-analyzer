@@ -64,8 +64,25 @@ aws-generate-dashboards:
 aws-dashboards: aws-normalize aws-generate-dashboards
 	@echo "✅ AWS dashboards generated! Run 'make serve' to view them."
 
+## GCP-Specific Advanced Analytics
+gcp-normalize:
+	@echo "Normalizing GCP billing data..."
+	cd viz_rill && uv run python aws-cur-wizard/scripts/normalize_gcp.py
+
+gcp-generate-dashboards:
+	@echo "Generating GCP-specific Rill dashboards..."
+	cd viz_rill && uv run python aws-cur-wizard/scripts/generate_gcp_rill_yaml.py \
+		--parquet data/normalized_gcp.parquet \
+		--output-dir . \
+		--cost-col cost \
+		--dim-prefixes "labels_,service__,project__" \
+		--timeseries-col date
+
+gcp-dashboards: gcp-normalize gcp-generate-dashboards
+	@echo "✅ GCP dashboards generated! Run 'make serve' to view them."
+
 #what this does:
 # 1. load data incrementally
-# 2. normalzes aws cost reports and generates Rill dashboards
+# 2. normalizes AWS & GCP cost reports and generates Rill dashboards
 # 3. starts Rill BI and opens in browser
-run-all: run-etl aws-normalize serve
+run-all: run-etl aws-normalize gcp-normalize serve

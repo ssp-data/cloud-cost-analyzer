@@ -1,0 +1,19 @@
+type: explore
+
+display_name: "GCP Cost Explorer"
+description: "Explore GCP billing data across services, projects, and regions"
+
+metrics_view: {{ metrics_view }}
+
+dimensions: '*'
+measures: '*'
+
+defaults:
+  comparison_mode: time
+  time_range: P4W
+  dimensions:
+    - service__description
+    - project__id
+  measures:
+    - total_cost
+    - total_usage
