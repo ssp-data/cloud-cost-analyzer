@@ -33,3 +33,6 @@ test-duplicates:
 	@echo "Running duplicate checks on cloud_cost_analytics.duckdb..."
 	@duckdb cloud_cost_analytics.duckdb < tests/test_duplicates.sql
 
+
+serve:
+	rill start viz_rill
