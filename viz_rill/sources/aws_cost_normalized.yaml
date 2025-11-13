@@ -58,3 +58,5 @@ sql: |
 
   FROM read_parquet('data/aws_costs/cur_export_test_00001/*.parquet', union_by_name=true)
   WHERE identity_time_interval IS NOT NULL
+  -- NOTE: If you change table_name in .dlt/config.toml, update this path:
+  --       'data/aws_costs/YOUR_TABLE_NAME/*.parquet'

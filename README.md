@@ -131,17 +131,55 @@ stripe_secret_key = "sk_live_your_key_here"
 
 ### 3. Update Pipeline Configuration
 
-Edit the pipeline files to point to your data sources:
+All pipeline configuration is centralized in `.dlt/config.toml`. Edit this file to point to your data sources:
 
-**`pipelines/aws_pipeline.py`**: Update S3 bucket path
-```python
-bucket_url = "s3://your-bucket/cur/CUR-export-test/data"
+**Edit `.dlt/config.toml`**:
+
+```toml
+# Pipeline configuration
+[pipeline]
+pipeline_name = "cloud_cost_analytics"  # Change if needed
+
+# AWS CUR configuration
+[sources.aws_cur]
+bucket_url = "s3://your-bucket-name"  # Your S3 bucket
+file_glob = "cur/your-report-name/data/**/*.parquet"  # Path to your CUR files
+table_name = "your_table_name"  # Name for the output table
+dataset_name = "aws_costs"  # Dataset name (default: aws_costs)
+
+# GCP BigQuery billing export configuration
+[sources.gcp_billing]
+# project_id is automatically read from secrets.toml
+# (uses source.bigquery.credentials.project_id)
+# Uncomment below only if you want to override:
+# project_id = "your-gcp-project-id"
+dataset = "billing_export"  # BigQuery dataset name
+dataset_name = "gcp_costs"  # Output dataset name (default: gcp_costs)
+# Update these table names to match your GCP billing export tables
+# Find them in BigQuery Console under your billing_export dataset
+table_names = [
+    "gcp_billing_export_resource_v1_XXXXXX_XXXXXX_XXXXXX",
+    "gcp_billing_export_v1_XXXXXX_XXXXXX_XXXXXX"
+]
+
+# Stripe configuration
+[sources.stripe]
+dataset_name = "stripe_costs"  # Dataset name (default: stripe_costs)
 ```
 
-**`pipelines/google_bq_incremental_pipeline.py`**: Update BigQuery table
-```python
-table_name = "your-project.billing_export.gcp_billing_export_v1_XXXXX"
-```
+**How to find your GCP billing table names:**
+1. Go to [BigQuery Console](https://console.cloud.google.com/bigquery)
+2. Find your billing export dataset (usually `billing_export`)
+3. Look for tables starting with `gcp_billing_export_v1_` or `gcp_billing_export_resource_v1_`
+4. Copy the full table names into the config above
+
+**Note about AWS table_name and Rill dashboards:**
+If you change the AWS `table_name` from the default `cur_export_test_00001`, you'll also need to update two Rill files:
+- `viz_rill/models/aws_costs.sql` - Update the parquet path
+- `viz_rill/sources/aws_cost_normalized.yaml` - Update the parquet path
+- `viz_rill/.env` - Update `INPUT_DATA_DIR`
+
+Both files have comments showing exactly where to update the table name.
 
 ### 4. Run the Pipeline
 
@@ -174,13 +212,18 @@ Data is stored in both formats:
 
 ## Troubleshooting
 
+### Configuration Issues
+- All configuration is in `.dlt/config.toml` - check this file first
+- Verify your table names, project IDs, and bucket paths match your cloud provider setup
+- The test runner will use your config values automatically
+
 ### AWS: "No files found"
-- Check S3 bucket path in `pipelines/aws_pipeline.py`
+- Check S3 bucket path in `.dlt/config.toml` under `[sources.aws_cur]`
 - Verify AWS credentials: `aws s3 ls s3://your-bucket/`
 - Wait 24 hours after enabling CUR export (first files take time)
 
 ### GCP: "Table not found"
-- Verify BigQuery table name in `pipelines/google_bq_incremental_pipeline.py`
+- Verify BigQuery table names in `.dlt/config.toml` under `[sources.gcp_billing]`
 - Check service account permissions (BigQuery Data Viewer + Job User)
 - Confirm billing export is enabled and dataset exists
 

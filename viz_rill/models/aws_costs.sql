@@ -1,5 +1,7 @@
 -- AWS Costs Model
 -- Reads from dlt-generated parquet files in data/aws_costs/
+-- NOTE: If you change table_name in .dlt/config.toml, update this path to match:
+--       'data/aws_costs/YOUR_TABLE_NAME/*.parquet'
 SELECT
   CAST(identity_time_interval AS DATE) AS date,
   line_item_product_code,

@@ -26,11 +26,22 @@ def load_data(
         start_date: An optional start date to limit the data retrieved. Defaults to None.
         end_date: An optional end date to limit the data retrieved. Defaults to None.
     """
+    # Load configuration from config.toml
+    try:
+        pipeline_name = dlt.config["pipeline.pipeline_name"]
+    except KeyError:
+        pipeline_name = "cloud_cost_analytics"
+
+    try:
+        dataset_name = dlt.config["sources.stripe.dataset_name"]
+    except KeyError:
+        dataset_name = "stripe_costs"
+
     # Using filesystem destination to write parquet files for Rill
     pipeline = dlt.pipeline(
-        pipeline_name="cloud_cost_analytics",
+        pipeline_name=pipeline_name,
         destination="filesystem",
-        dataset_name="stripe_costs",
+        dataset_name=dataset_name,
         # export_schema_path="exported_schema/stripe_cost_schema.json",
     )
     source = stripe_source(
@@ -63,11 +74,22 @@ def load_incremental_endpoints(
         end_date: An optional end date to limit the data retrieved.
                   Defaults to None. Format: datetime(YYYY, MM, DD).
     """
+    # Load configuration from config.toml
+    try:
+        pipeline_name = dlt.config["pipeline.pipeline_name"]
+    except KeyError:
+        pipeline_name = "cloud_cost_analytics"
+
+    try:
+        dataset_name = dlt.config["sources.stripe.dataset_name"]
+    except KeyError:
+        dataset_name = "stripe_costs"
+
     # Using filesystem destination to write parquet files for Rill
     pipeline = dlt.pipeline(
-        pipeline_name="cloud_cost_analytics",
+        pipeline_name=pipeline_name,
         destination="filesystem",
-        dataset_name="stripe_costs",
+        dataset_name=dataset_name,
         # export_schema_path="exported_schema/stripe_cost_schema.json",
     )
     # load all data on the first run that created before end_date

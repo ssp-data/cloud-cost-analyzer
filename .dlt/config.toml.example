@@ -1,0 +1,78 @@
+# Cloud Cost Analyzer Configuration
+# Copy this file to config.toml and update with your values
+
+[runtime]
+log_level="ERROR"  # ERROR hides warnings (stripe has many tables with potentially no data)
+dlthub_telemetry = false  # Disable anonymous usage data reporting
+
+# Filesystem destination configuration - writes parquet files for Rill
+[destination.filesystem]
+bucket_url = "viz_rill/data"  # Output directory for parquet files
+
+[destination.filesystem.loader_file_format]
+file_format = "parquet"
+
+# Internal filesystem source (usually not needed)
+[sources.filesystem]
+local_dir = "/path/to/your/local/dir"  # Update if using local filesystem source
+bucket_url = "https://s3.us-west-1.amazonaws.com"  # Update if needed
+
+# ============================================================
+# Pipeline Configuration (shared across all pipelines)
+# ============================================================
+[pipeline]
+pipeline_name = "cloud_cost_analytics"  # Name used by all pipelines
+
+# ============================================================
+# AWS Cost and Usage Report (CUR) Configuration
+# ============================================================
+[sources.aws_cur]
+# S3 bucket where AWS CUR exports are stored
+bucket_url = "s3://your-bucket-name"
+
+# Path pattern to your CUR parquet files
+# Example: "cur/YourReportName/data/**/*.parquet"
+file_glob = "cur/CUR-export-test/data/**/*.parquet"
+
+# Name for the output table (will appear in viz_rill/data/)
+# Keep alphanumeric and underscores only
+table_name = "cur_export_test_00001"
+
+# Output dataset name (default: aws_costs)
+dataset_name = "aws_costs"
+
+# ============================================================
+# GCP BigQuery Billing Export Configuration
+# ============================================================
+[sources.gcp_billing]
+# Your GCP project ID (optional - will use project_id from secrets.toml if not set)
+# Only needed if you want to override the project_id from BigQuery credentials
+# project_id = "your-project-id"
+
+# BigQuery dataset where billing data is exported
+# Usually "billing_export" (default when setting up GCP billing export)
+dataset = "billing_export"
+
+# Output dataset name (default: gcp_costs)
+dataset_name = "gcp_costs"
+
+# GCP billing export table names
+# Find these in BigQuery Console under your billing_export dataset
+# Tables usually have format: gcp_billing_export_v1_XXXXXX_XXXXXX_XXXXXX
+# You typically have two tables:
+#   1. Standard billing export: gcp_billing_export_v1_*
+#   2. Resource-level export: gcp_billing_export_resource_v1_*
+table_names = [
+    "gcp_billing_export_resource_v1_014CCF_84D5DF_A43BC0",
+    "gcp_billing_export_v1_014CCF_84D5DF_A43BC0"
+]
+
+# ============================================================
+# Stripe Revenue Data Configuration
+# ============================================================
+[sources.stripe]
+# Output dataset name (default: stripe_costs)
+dataset_name = "stripe_costs"
+
+# Note: Stripe API key is configured in .dlt/secrets.toml
+# See secrets.toml.example for credential setup

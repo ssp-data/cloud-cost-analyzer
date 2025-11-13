@@ -16,7 +16,31 @@ file_format = "parquet"
 local_dir = "/home/sspaeti/Documents/datalake/dlt-stage" # fill this in!
 bucket_url = "https://s3.us-west-1.amazonaws.com" # fill this in!
 
+# Pipeline configuration
+[pipeline]
+pipeline_name = "cloud_cost_analytics"
+
+# AWS CUR configuration
 [sources.aws_cur]
 bucket_url = "s3://cost-analysis-demo-sspaeti"
 file_glob = "cur/CUR-export-test/data/**/*.parquet"
 table_name = "cur_export_test_00001"
+dataset_name = "aws_costs"
+
+# GCP BigQuery billing export configuration
+[sources.gcp_billing]
+# project_id is read from secrets.toml (source.bigquery.credentials.project_id)
+# Uncomment below to override:
+# project_id = "testing-bigquery-220511"
+dataset = "billing_export"
+dataset_name = "gcp_costs"
+# Update these table names to match your GCP billing export tables
+# Find them in BigQuery Console under your billing_export dataset
+table_names = [
+    "gcp_billing_export_resource_v1_014CCF_84D5DF_A43BC0",
+    "gcp_billing_export_v1_014CCF_84D5DF_A43BC0"
+]
+
+# Stripe configuration
+[sources.stripe]
+dataset_name = "stripe_costs"

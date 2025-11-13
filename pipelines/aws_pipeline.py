@@ -14,6 +14,17 @@ if __name__ == "__main__":
     file_glob = dlt.config["sources.aws_cur.file_glob"]
     table_name = dlt.config["sources.aws_cur.table_name"]
 
+    # Optional config with defaults
+    try:
+        dataset_name = dlt.config["sources.aws_cur.dataset_name"]
+    except KeyError:
+        dataset_name = "aws_costs"
+
+    try:
+        pipeline_name = dlt.config["pipeline.pipeline_name"]
+    except KeyError:
+        pipeline_name = "cloud_cost_analytics"
+
     # Configure filesystem resource
     filesystem_resource = filesystem(
         bucket_url=bucket_url,
@@ -27,9 +38,9 @@ if __name__ == "__main__":
     # Create pipeline with appropriate naming
     # Using filesystem destination to write parquet files for Rill
     pipeline = dlt.pipeline(
-        pipeline_name="cloud_cost_analytics",
+        pipeline_name=pipeline_name,
         destination="filesystem",
-        dataset_name="aws_costs",
+        dataset_name=dataset_name,
         # export_schema_path="exported_schema/aws_cost_schema.json",
     )
 

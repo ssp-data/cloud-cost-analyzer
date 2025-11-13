@@ -12,8 +12,8 @@ from google.oauth2 import service_account
 @dlt.resource(write_disposition="append")
 def bigquery_billing_table(
     table_name: str,
-    dataset: str = "billing_export",
-    project_id: str = "testing-bigquery-220511",
+    dataset: str = None,
+    project_id: str = None,
     incremental: dlt.sources.incremental[str] = dlt.sources.incremental("export_time", initial_value=pendulum.parse("2000-01-01T00:00:00Z"))
 ):
     """
@@ -52,23 +52,32 @@ def bigquery_billing_table(
 def load_standalone_table_resource() -> None:
     """Load BigQuery billing export tables into DuckDB"""
 
+    # Load configuration from config.toml
+    try:
+        pipeline_name = dlt.config["pipeline.pipeline_name"]
+    except KeyError:
+        pipeline_name = "cloud_cost_analytics"
+
+    try:
+        dataset_name = dlt.config["sources.gcp_billing.dataset_name"]
+    except KeyError:
+        dataset_name = "gcp_costs"
+
+    project_id = dlt.secrets.get('source.bigquery.credentials.project_id')
+    dataset = dlt.config["sources.gcp_billing.dataset"]
+    table_names = dlt.config["sources.gcp_billing.table_names"]
+
     # Create pipeline to write parquet files for Rill
     # Using filesystem destination to write parquet files
     pipeline = dlt.pipeline(
-        pipeline_name="cloud_cost_analytics",
+        pipeline_name=pipeline_name,
         destination="filesystem",
-        dataset_name="gcp_costs",
+        dataset_name=dataset_name,
         # export_schema_path="exported_schema/google_cost_schema.json"
     )
 
-    # Define the two billing tables to load
-    table_names = [
-        "gcp_billing_export_resource_v1_014CCF_84D5DF_A43BC0",
-        "gcp_billing_export_v1_014CCF_84D5DF_A43BC0"
-    ]
-
     # Create resources for each table
-    resources = [bigquery_billing_table(table_name) for table_name in table_names]
+    resources = [bigquery_billing_table(table_name, dataset=dataset, project_id=project_id) for table_name in table_names]
 
     # Run the pipeline with incremental (append) write disposition
     # This will only load new records based on export_time
