@@ -14,8 +14,12 @@ clear-data:
 	rm -rf viz_rill/data
 	mkdir -p viz_rill/data
 
-clear: dlt-clear clear-data
+clear-rill:
+	@echo "Clearing Rill cache and materialized views..."
+	rm -rf viz_rill/tmp/
+	@echo "✅ Rill cache cleared"
 
+clear: dlt-clear clear-data clear-rill
 
 
 run-aws:
