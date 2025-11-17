@@ -68,6 +68,32 @@ dimensions:
     column: pricing_term
     display_name: Pricing Term
 
+  # Rate dimensions (for analysis)
+  - name: line_item_blended_rate
+    column: line_item_blended_rate
+    display_name: Blended Rate
+
+  - name: line_item_unblended_rate
+    column: line_item_unblended_rate
+    display_name: Unblended Rate
+
+  # Additional line item dimensions
+  - name: line_item_line_item_description
+    column: line_item_line_item_description
+    display_name: Line Item Description
+
+  - name: line_item_blended_cost
+    column: line_item_blended_cost
+    display_name: Blended Cost (raw)
+
+  - name: line_item_unblended_cost
+    column: line_item_unblended_cost
+    display_name: Unblended Cost (raw)
+
+  - name: line_item_usage_amount
+    column: line_item_usage_amount
+    display_name: Usage Amount (raw)
+
 
 # ─── Measures ───────────────────────────────────────
 measures:
