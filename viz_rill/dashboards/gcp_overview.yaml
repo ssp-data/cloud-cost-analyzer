@@ -4,7 +4,7 @@ type: canvas
 display_name: "GCP Cost Overview"
 
 defaults:
-  time_range: P30D
+  time_range: P14D
   comparison_mode: time
 
 rows:

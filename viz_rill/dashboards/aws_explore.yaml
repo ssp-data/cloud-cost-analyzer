@@ -14,7 +14,7 @@ measures: '*'
 
 defaults:
   comparison_mode: time
-  time_range: P3M  # Last 3 months
+  time_range: P1M  # Last 1 months
   dimensions:
     - product_product_name
     - product_region_code

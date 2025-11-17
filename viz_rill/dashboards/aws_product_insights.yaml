@@ -6,7 +6,7 @@ type: canvas
 display_name: "AWS Product Deep Dive"
 
 defaults:
-  time_range: P12M
+  time_range: P1M
   comparison_mode: time
 
 rows:
