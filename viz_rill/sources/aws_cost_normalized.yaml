@@ -2,9 +2,7 @@
 # Auto-generated source for AWS Cost and Usage Report data
 # Inspired by: https://github.com/rilldata/aws-cur-wizard (now integrated as cur-wizard)
 
-type: source
-
-connector: duckdb
+type: model
 
 sql: |
   SELECT
