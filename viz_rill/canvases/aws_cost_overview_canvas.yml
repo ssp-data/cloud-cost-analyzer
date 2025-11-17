@@ -2,41 +2,20 @@ type: canvas
 display_name: Advanced AWS Cost Canvas
 defaults:
   comparison_mode: time
-  time_range: P1M 
-
-
-
-
-
-
-
-
-
-
-
-
-
+  time_range: P1M
 
 rows:
   - items:
-
-
-
-  - items:
       - kpi_grid:
-          comparison: [delta, percent_change]
+          comparison:
+            - delta
+            - percent_change
           measures:
             - total_unblended_cost
             - total_effective_cost
           metrics_view: aws_cost_metrics
           sparkline: right
         width: 8
-
-
-
-
-
-
       - pie_chart:
           color:
             field: product_product_family
@@ -49,22 +28,7 @@ rows:
           metrics_view: aws_cost_metrics
           title: Spend by Product Family
         width: 4
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    height: 40px
   - items:
       - bar_chart:
           metrics_view: aws_cost_metrics
@@ -80,33 +44,6 @@ rows:
           title: Cost by AWS Region
         width: 6
     height: 300px
-
-
-
-
-
-
-
-
-
-  - items:
-      - line_chart:
-          metrics_view: aws_cost_metrics
-          x:
-            field: line_item_usage_start_date
-            type: temporal
-          y:
-            field: cost_per_unit
-            type: quantitative
-          title: Unit Economics Trend ($ per usage-unit)
-        width: 12
-    height: 300px
-
-
-
-
-
-
   - items:
       - bar_chart:
           metrics_view: aws_cost_metrics
@@ -121,14 +58,9 @@ rows:
             type: nominal
           title: Spend by AWS Account
         width: 12
-    height: 300px
+    height: 40px
 
-
-
-
-
-
-time_ranges: [PT24H, P7D, P30D, P3M, P12M]
+time_ranges: [ PT24H, P7D, P30D, P3M, P12M ]
 filters:
   enable: true
 theme: theme

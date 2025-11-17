@@ -3,266 +3,155 @@ display_name: Dynamic Tag Insights
 defaults: { time_range: P1M }
 
 rows:
-
-  
-  
-  
-  
   - items:
       - kpi_grid:
-          measures: [ total_unblended_cost ]
+          measures:
+            - total_unblended_cost
           metrics_view: aws_cost_metrics
           dimension_filters: line_item_product_code IN ('AmazonS3')
-          title: "Line Item Product Code — AmazonS3"
+          title: Line Item Product Code — AmazonS3
         width: 12
     height: 160px
-
-  
-  
-  
-  
-
-  
-  
-  
-  
+  - items:
+      - leaderboard:
+          dimensions:
+            - line_item_blended_cost
+          measures:
+            - total_unblended_cost
+          num_rows: 15
+          metrics_view: aws_cost_metrics
+          title: Line Item Blended Cost
+        width: 12
+    height: 40px
+  - items:
+      - leaderboard:
+          dimensions:
+            - line_item_unblended_cost
+          measures:
+            - total_unblended_cost
+          num_rows: 15
+          metrics_view: aws_cost_metrics
+          title: Line Item Unblended Cost
+        width: 12
+    height: 40px
+  - items:
+      - leaderboard:
+          dimensions:
+            - line_item_usage_amount
+          measures:
+            - total_unblended_cost
+          num_rows: 15
+          metrics_view: aws_cost_metrics
+          title: Line Item Usage Amount
+        width: 12
   - items:
       - bar_chart:
-          
           x:
             field: line_item_operation
             type: nominal
             limit: 10
-          
-
-          
           color:
             field: line_item_operation
             type: nominal
-            
             limit: 10
           measure:
             field: total_unblended_cost
             type: quantitative
-          
           metrics_view: aws_cost_metrics
-          title: "Line Item Operation"
-        width: 12
+          title: Line Item Operation
+        width: 6
     height: 280px
-  
-
-  
-  
-  
-  
   - items:
       - bar_chart:
-          
           x:
             field: line_item_line_item_description
             type: nominal
             limit: 10
-          
-
-          
           color:
             field: line_item_line_item_description
             type: nominal
-            
             limit: 10
           measure:
             field: total_unblended_cost
             type: quantitative
-          
           metrics_view: aws_cost_metrics
-          title: "Line Item Line Item Description"
+          title: Line Item Line Item Description
         width: 12
     height: 280px
-  
-
-  
-  
-  
-  
   - items:
       - bar_chart:
-          
           x:
             field: line_item_blended_rate
             type: nominal
             limit: 10
-          
-
-          
           color:
             field: line_item_blended_rate
             type: nominal
-            
             limit: 10
           measure:
             field: total_unblended_cost
             type: quantitative
-          
           metrics_view: aws_cost_metrics
-          title: "Line Item Blended Rate"
+          title: Line Item Blended Rate
         width: 12
     height: 280px
-  
-
-  
-  
-  
-  
   - items:
       - bar_chart:
-          
           x:
             field: line_item_unblended_rate
             type: nominal
             limit: 10
-          
-
-          
           color:
             field: line_item_unblended_rate
             type: nominal
-            
             limit: 10
           measure:
             field: total_unblended_cost
             type: quantitative
-          
           metrics_view: aws_cost_metrics
-          title: "Line Item Unblended Rate"
+          title: Line Item Unblended Rate
         width: 12
     height: 280px
-  
-
-  
-  
-  
-  
   - items:
       - bar_chart:
-          
           x:
             field: line_item_usage_type
             type: nominal
             limit: 10
-          
-
-          
           color:
             field: line_item_usage_type
             type: nominal
-            
             limit: 10
           measure:
             field: total_unblended_cost
             type: quantitative
-          
           metrics_view: aws_cost_metrics
-          title: "Line Item Usage Type"
+          title: Line Item Usage Type
         width: 12
     height: 280px
-  
-
-  
-  
-  
-  
   - items:
       - leaderboard:
-          
-
-          
-          dimensions: [ line_item_usage_start_date ]
-          measures:   [ total_unblended_cost ]
+          dimensions:
+            - line_item_usage_start_date
+          measures:
+            - total_unblended_cost
           num_rows: 15
-          
           metrics_view: aws_cost_metrics
-          title: "Line Item Usage Start Date"
+          title: Line Item Usage Start Date
         width: 12
     height: 280px
-  
-
-  
-  
-  
-  
   - items:
       - leaderboard:
-          
-
-          
-          dimensions: [ line_item_usage_end_date ]
-          measures:   [ total_unblended_cost ]
+          dimensions:
+            - line_item_usage_end_date
+          measures:
+            - total_unblended_cost
           num_rows: 15
-          
           metrics_view: aws_cost_metrics
-          title: "Line Item Usage End Date"
+          title: Line Item Usage End Date
         width: 12
     height: 280px
-  
 
-  
-  
-  
-  
-  - items:
-      - leaderboard:
-          
-
-          
-          dimensions: [ line_item_blended_cost ]
-          measures:   [ total_unblended_cost ]
-          num_rows: 15
-          
-          metrics_view: aws_cost_metrics
-          title: "Line Item Blended Cost"
-        width: 12
-    height: 280px
-  
-
-  
-  
-  
-  
-  - items:
-      - leaderboard:
-          
-
-          
-          dimensions: [ line_item_unblended_cost ]
-          measures:   [ total_unblended_cost ]
-          num_rows: 15
-          
-          metrics_view: aws_cost_metrics
-          title: "Line Item Unblended Cost"
-        width: 12
-    height: 280px
-  
-
-  
-  
-  
-  
-  - items:
-      - leaderboard:
-          
-
-          
-          dimensions: [ line_item_usage_amount ]
-          measures:   [ total_unblended_cost ]
-          num_rows: 15
-          
-          metrics_view: aws_cost_metrics
-          title: "Line Item Usage Amount"
-        width: 12
-    height: 280px
-  
-
-
-time_ranges: [PT24H, P7D, P30D, P3M, P12M]
+time_ranges: [ PT24H, P7D, P30D, P3M, P12M ]
 filters: { enable: true }
 theme: theme

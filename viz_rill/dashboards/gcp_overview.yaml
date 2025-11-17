@@ -5,55 +5,40 @@ display_name: "GCP Cost Overview"
 
 defaults:
   time_range: P14D
-  comparison_mode: time
 
 rows:
-  # Top-level metrics
   - items:
-      - big_number:
-          measure: total_cost
+      - kpi_grid:
+          measures:
+            - total_cost
+            - record_count
+            - total_usage
+            - cost_per_unit
           metrics_view: gcp_cost_metrics
-          title: "Total Cost"
-        width: 3
-
-      - big_number:
-          measure: record_count
-          metrics_view: gcp_cost_metrics
-          title: "Total Records"
-        width: 3
-    height: 150px
-
-  # Time series
-  - items:
-      - time_series:
-          metrics_view: gcp_cost_metrics
-          y:
-            - field: total_cost
-              type: quantitative
-          title: "Cost Over Time"
         width: 12
-    height: 300px
-
-  # Service breakdown
+    height: 200px
   - items:
       - leaderboard:
-          dimensions: [service__description]
-          measures: [total_cost]
+          dimensions:
+            - service__description
+          measures:
+            - total_cost
           num_rows: 10
           metrics_view: gcp_cost_metrics
-          title: "Top Services"
+          title: Top Services
         width: 6
-
       - leaderboard:
-          dimensions: [project__id]
-          measures: [total_cost]
+          dimensions:
+            - project__id
+          measures:
+            - total_cost
           num_rows: 10
           metrics_view: gcp_cost_metrics
-          title: "Top Projects"
+          title: Top Projects
         width: 6
     height: 300px
 
-time_ranges: [P7D, P30D, P3M, P6M, P12M]
+time_ranges: [ P7D, P30D, P3M, P6M, P12M ]
 filters:
   enable: true
 

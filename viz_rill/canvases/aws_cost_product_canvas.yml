@@ -3,40 +3,30 @@ display_name: Dynamic Tag Insights
 defaults: { time_range: P1M }
 
 rows:
-
   - items:
       - leaderboard:
-          dimensions: [ product_servicecode ]
-          measures: [ total_unblended_cost ]
-          num_rows: 15
-          metrics_view: aws_cost_metrics
-          dimension_filters: product_servicecode IN ('AmazonS3', 'AWSDataTransfer')
-          title: "Product Servicecode"
-        width: 12
-    height: 280px
-
-  - items:
-      - leaderboard:
-          dimensions: [ product_product_family ]
-          measures: [ total_unblended_cost ]
+          dimensions:
+            - product_product_family
+          measures:
+            - total_unblended_cost
           num_rows: 15
           metrics_view: aws_cost_metrics
           dimension_filters: product_product_family IN ('API Request', 'Storage', 'Data Transfer')
-          title: "Product Product Family"
+          title: Product Product Family
         width: 12
     height: 280px
-
   - items:
       - leaderboard:
-          dimensions: [ product_location ]
-          measures: [ total_unblended_cost ]
+          dimensions:
+            - product_location
+          measures:
+            - total_unblended_cost
           num_rows: 10
           metrics_view: aws_cost_metrics
           dimension_filters: product_location IN ('US West (N. California)', 'EU
             (Frankfurt)', 'EU (Paris)')
-          title: "Product Location — Top"
+          title: Product Location — Top
         width: 6
-
       - pie_chart:
           color:
             field: product_location
@@ -49,20 +39,20 @@ rows:
           metrics_view: aws_cost_metrics
           dimension_filters: product_location NIN ('US West (N. California)', 'EU
             (Frankfurt)', 'EU (Paris)')
-          title: "Product Location — Others"
+          title: Product Location — Others
         width: 6
     height: 280px
-
   - items:
       - leaderboard:
-          dimensions: [ product_region_code ]
-          measures: [ total_unblended_cost ]
+          dimensions:
+            - product_region_code
+          measures:
+            - total_unblended_cost
           num_rows: 10
           metrics_view: aws_cost_metrics
           dimension_filters: product_region_code IN ('us-west-1', 'eu-central-1', 'eu-west-3')
-          title: "Product Region Code — Top"
+          title: Product Region Code — Top
         width: 6
-
       - pie_chart:
           color:
             field: product_region_code
@@ -74,46 +64,8 @@ rows:
             type: quantitative
           metrics_view: aws_cost_metrics
           dimension_filters: product_region_code NIN ('us-west-1', 'eu-central-1', 'eu-west-3')
-          title: "Product Region Code — Others"
+          title: Product Region Code — Others
         width: 6
-    height: 280px
-
-  - items:
-      - area_chart:
-          metrics_view: aws_cost_metrics
-          color:
-            field: product_sku
-            limit: 10
-            type: nominal
-          x:
-            field: product_sku
-            limit: 10
-            type: nominal
-          title: Product Sku
-          description: ""
-        width: 12
-    height: 280px
-
-  - items:
-      - bar_chart:
-
-          x:
-            field: product_usagetype
-            type: nominal
-            limit: 10
-
-          color:
-            field: product_usagetype
-            type: nominal
-
-            limit: 10
-          measure:
-            field: total_unblended_cost
-            type: quantitative
-
-          metrics_view: aws_cost_metrics
-          title: "Product Usagetype"
-        width: 12
     height: 280px
 
 time_ranges: [ PT24H, P7D, P30D, P3M, P12M ]
