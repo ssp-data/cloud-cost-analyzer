@@ -90,4 +90,4 @@ gcp-dashboards: gcp-normalize gcp-generate-dashboards
 # 1. load data incrementally
 # 2. normalizes AWS & GCP cost reports and generates Rill dashboards
 # 3. starts Rill BI and opens in browser
-run-all: run-etl aws-normalize gcp-normalize serve
+run-all: install run-etl aws-normalize gcp-normalize serve

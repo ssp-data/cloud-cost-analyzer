@@ -16,7 +16,6 @@ Setup secrets and configs, and then run:
 ```
 git clone git@github.com:ssp-data/cloud-cost-analyzer.git
 cd cloud-cost-analyzer
-make install
 make run-all
 ```
 
