@@ -3,20 +3,47 @@ import os
 import pathlib
 import sys
 
+import dlt
 import duckdb
 from dotenv import load_dotenv
 
 load_dotenv()
 
-NORMALIZED_DATA_DIR = pathlib.Path(os.getenv("NORMALIZED_DATA_DIR") or "").resolve()
-if not NORMALIZED_DATA_DIR.exists() or not NORMALIZED_DATA_DIR.is_dir():
-    sys.exit(f"NORMALIZED_DATA_DIR ({NORMALIZED_DATA_DIR}) does not exist or is not a directory")
-output_path = NORMALIZED_DATA_DIR / "normalized.parquet"
+# Read configuration from dlt config
+try:
+    normalized_data_dir_str = dlt.config["sources.aws_cur.normalized_data_dir"]
+except KeyError:
+    # Fall back to environment variables if not in config
+    normalized_data_dir_str = os.getenv("NORMALIZED_DATA_DIR")
 
-INPUT_DATA_DIR = pathlib.Path(os.getenv("INPUT_DATA_DIR") or "").resolve()
-if not INPUT_DATA_DIR.exists() or not INPUT_DATA_DIR.is_dir():
-    sys.exit(f"INPUT_DATA_DIR ({INPUT_DATA_DIR}) does not exist or is not a directory")
+try:
+    input_data_dir_str = dlt.config["sources.aws_cur.input_data_dir"]
+except KeyError:
+    # Fall back to environment variables if not in config
+    input_data_dir_str = os.getenv("INPUT_DATA_DIR")
+
+if not normalized_data_dir_str:
+    sys.exit("ERROR: normalized_data_dir not configured. Add to .dlt/config.toml under [sources.aws_cur]")
+if not input_data_dir_str:
+    sys.exit("ERROR: input_data_dir not configured. Add to .dlt/config.toml under [sources.aws_cur]")
+
+NORMALIZED_DATA_DIR = pathlib.Path(normalized_data_dir_str).resolve()
+INPUT_DATA_DIR = pathlib.Path(input_data_dir_str).resolve()
+
+# Create directories if they don't exist
+NORMALIZED_DATA_DIR.mkdir(parents=True, exist_ok=True)
+INPUT_DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+output_path = NORMALIZED_DATA_DIR / "normalized.parquet"
 full_input_path = f"{INPUT_DATA_DIR}/*.parquet"
+
+# Check if any parquet files exist
+parquet_files = list(INPUT_DATA_DIR.glob("*.parquet"))
+if not parquet_files:
+    print(f"ℹ️  No parquet files found in {INPUT_DATA_DIR}")
+    print(f"   This is normal for incremental loading when no new data is available.")
+    print(f"   Skipping AWS normalization.")
+    sys.exit(0)
 
 con = duckdb.connect(database=":memory:")
 

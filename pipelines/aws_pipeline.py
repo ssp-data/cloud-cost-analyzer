@@ -64,8 +64,7 @@ if __name__ == "__main__":
     # Use loader_file_format="parquet" in run() to generate parquet files
     load_info = pipeline.run(resource, loader_file_format="parquet")
 
-    print("\n" + "="*50)
-    print("Load Info:")
-    print(load_info)
-    print("\nNormalize Info:")
-    print(pipeline.last_trace.last_normalize_info)
+    # Print concise summary instead of full schema
+    print(f"\nPipeline {pipeline.pipeline_name} completed successfully")
+    print(f"Loaded to: {pipeline.destination}")
+    print(f"Dataset: {pipeline.dataset_name}")

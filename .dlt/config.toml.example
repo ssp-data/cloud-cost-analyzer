@@ -41,6 +41,16 @@ table_name = "cur_export_test_00001"
 # Output dataset name (default: aws_costs)
 dataset_name = "aws_costs"
 
+# Only load data from this date onwards (filters by file modification date)
+# Format: YYYY-MM-DD
+initial_start_date = "2025-09-01"
+
+# Directory paths for data processing
+# Input directory: where AWS parquet files are loaded by the pipeline
+# Normalized directory: where normalized parquet files are written
+input_data_dir = "viz_rill/data/aws_costs/cur_export_test_00001"
+normalized_data_dir = "viz_rill/data/aws_costs"
+
 # ============================================================
 # GCP BigQuery Billing Export Configuration
 # ============================================================
@@ -56,6 +66,10 @@ dataset = "billing_export"
 # Output dataset name (default: gcp_costs)
 dataset_name = "gcp_costs"
 
+# Only load data from this date onwards (filters by export_time)
+# Format: YYYY-MM-DDTHH:MM:SSZ
+initial_start_date = "2025-09-01T00:00:00Z"
+
 # GCP billing export table names
 # Find these in BigQuery Console under your billing_export dataset
 # Tables usually have format: gcp_billing_export_v1_XXXXXX_XXXXXX_XXXXXX
@@ -67,12 +81,22 @@ table_names = [
     "gcp_billing_export_v1_014CCF_84D5DF_A43BC0"
 ]
 
+# Directory paths for data processing
+# Input directory: where GCP parquet files are loaded by the pipeline
+# Normalized directory: where normalized parquet files are written
+input_data_dir = "viz_rill/data/gcp_costs"
+normalized_data_dir = "viz_rill/data/gcp_costs"
+
 # ============================================================
 # Stripe Revenue Data Configuration
 # ============================================================
 [sources.stripe]
 # Output dataset name (default: stripe_costs)
 dataset_name = "stripe_costs"
+
+# Only load data from this date onwards (filters by created timestamp)
+# Format: YYYY-MM-DD
+initial_start_date = "2025-09-01"
 
 # Note: Stripe API key is configured in .dlt/secrets.toml
 # See secrets.toml.example for credential setup

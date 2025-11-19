@@ -27,6 +27,8 @@ file_glob = "cur/CUR-export-test/data/**/*.parquet"
 table_name = "cur_export_test_00001"
 dataset_name = "aws_costs"
 initial_start_date = "2025-09-01"  # Only load data from this date onwards (filters by file modification date)
+input_data_dir = "viz_rill/data/aws_costs/cur_export_test_00001"  # Directory where AWS parquet files are loaded
+normalized_data_dir = "viz_rill/data/aws_costs"  # Directory for normalized AWS data
 
 # GCP BigQuery billing export configuration
 [sources.gcp_billing]
@@ -42,6 +44,8 @@ table_names = [
     "gcp_billing_export_resource_v1_014CCF_84D5DF_A43BC0",
     "gcp_billing_export_v1_014CCF_84D5DF_A43BC0"
 ]
+input_data_dir = "viz_rill/data/gcp_costs"  # Directory where GCP parquet files are loaded
+normalized_data_dir = "viz_rill/data/gcp_costs"  # Directory for normalized GCP data
 
 # Stripe configuration
 [sources.stripe]

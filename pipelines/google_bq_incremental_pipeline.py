@@ -102,9 +102,10 @@ def load_standalone_table_resource() -> None:
     # This will only load new records based on export_time
     # Use loader_file_format="parquet" in run() to generate parquet files
     info = pipeline.run(resources, loader_file_format="parquet")
-    print(info)
-    print(f"\nSuccessfully loaded {len(table_names)} tables to DuckDB (incremental)")
-    print(pipeline.default_schema.to_pretty_yaml())
+
+    # Print concise summary
+    print(f"Pipeline {pipeline.pipeline_name} load step completed in {info}")
+    print(f"Successfully loaded {len(table_names)} tables to {pipeline.destination} (incremental)")
 
 
 

@@ -53,7 +53,11 @@ def load_data(
     )
     # Use loader_file_format="parquet" in run() to generate parquet files
     load_info = pipeline.run(source, loader_file_format="parquet")
-    print(load_info)
+
+    # Print concise summary
+    print(f"\nPipeline {pipeline.pipeline_name} completed successfully")
+    print(f"Loaded to: {pipeline.destination}")
+    print(f"Dataset: {pipeline.dataset_name}")
 
 
 def load_incremental_endpoints(
@@ -122,7 +126,11 @@ def load_incremental_endpoints(
     )
     # Use loader_file_format="parquet" in run() to generate parquet files
     load_info = pipeline.run(source, loader_file_format="parquet")
-    print(load_info)
+
+    # Print concise summary
+    print(f"\nPipeline {pipeline.pipeline_name} completed successfully")
+    print(f"Loaded to: {pipeline.destination}")
+    print(f"Dataset: {pipeline.dataset_name}")
 
     # # load nothing, because incremental loading and end date limit
     # source = incremental_stripe_source(
