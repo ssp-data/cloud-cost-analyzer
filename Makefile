@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := run-all
 
 install:
+	mkdir -p viz_rill/data/
 	uv sync
 
 dlt-clear:
