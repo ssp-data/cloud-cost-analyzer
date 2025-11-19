@@ -1,5 +1,22 @@
 .DEFAULT_GOAL := run-all
 
+check-secrets:
+	@if [ ! -f .dlt/secrets.toml ]; then \
+		echo ""; \
+		echo "================================================================================"; \
+		echo "ERROR: Missing .dlt/secrets.toml"; \
+		echo "================================================================================"; \
+		echo ""; \
+		echo "Please create .dlt/secrets.toml from the example:"; \
+		echo "  cp .dlt/secrets.toml.example .dlt/secrets.toml"; \
+		echo ""; \
+		echo "Then edit .dlt/secrets.toml and add your credentials."; \
+		echo ""; \
+		echo "================================================================================"; \
+		echo ""; \
+		exit 1; \
+	fi
+
 install:
 	mkdir -p viz_rill/data/
 	uv sync
@@ -23,19 +40,19 @@ clear-rill:
 clear: dlt-clear clear-data clear-rill
 
 
-run-aws:
+run-aws: check-secrets
 	uv run python pipelines/aws_pipeline.py
 	echo "####################################################################"
-run-gcp:
+run-gcp: check-secrets
 	uv run python pipelines/google_bq_incremental_pipeline.py
 	echo "####################################################################"
-run-stripe:
+run-stripe: check-secrets
 	uv run python pipelines/stripe_pipeline.py
 	echo "####################################################################"
 
 
 #run dlt incremental loads
-run-etl: run-aws run-gcp run-stripe
+run-etl: check-secrets run-aws run-gcp run-stripe
 
 
 test-duplicates-duckdb:
