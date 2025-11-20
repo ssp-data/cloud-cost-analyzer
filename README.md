@@ -2,6 +2,85 @@
 
 Multi-cloud cost analytics platform combining AWS Cost and Usage Reports (CUR), GCP billing data, and Stripe revenue metrics. Built with dlt for data ingestion, DuckDB for storage, and Rill for visualization.
 
+```mermaid
+graph TB
+
+subgraph "1: EXTRACT (dlt)"
+    A1[AWS S3<br/>CUR Parquet]
+    A2[GCP BigQuery<br/>Billing Export]
+    A3[Stripe API<br/>Revenue]
+
+    P1[aws_pipeline.py<br/>📥 Incremental]
+    P2[google_bq_pipeline.py<br/>📥 Incremental]
+    P3[stripe_pipeline.py<br/>📥 Incremental]
+
+    A1 --> P1
+    A2 --> P2
+    A3 --> P3
+end
+
+subgraph "2: NORMALIZE (Python + DuckDB)"
+    N1[normalize.py<br/>🔧 Flatten MAP columns]
+    N2[normalize_gcp.py<br/>🔧 Flatten nested data]
+
+    P1 --> N1
+    P2 --> N2
+    P3 --> R1
+end
+
+subgraph "3: RAW STORAGE (Parquet)"
+    R1[data/aws_costs/<br/>normalized.parquet]
+    R2[data/gcp_costs/<br/>normalized.parquet]
+    R3[data/stripe_costs/<br/>balance_transaction.parquet]
+
+    N1 --> R1
+    N2 --> R2
+end
+
+subgraph "4: MODEL (SQL - Star Schema)"
+    M1[aws_costs.sql<br/>🔷 Dimensions + Facts]
+    M2[gcp_costs.sql<br/>🔷 Dimensions + Facts]
+    M3[stripe_revenue.sql<br/>🔷 Dimensions + Facts]
+    M4[unified_cost_model.sql<br/>🌟 UNION ALL + Currency Conversion]
+
+    R1 --> M1
+    R2 --> M2
+    R3 --> M3
+
+    M1 --> M4
+    M2 --> M4
+    M3 --> M4
+end
+
+subgraph "5: METRICS & DASHBOARDS (Rill)"
+    MV1[aws_cost_metrics.yaml<br/>📊 KPIs & Measures]
+    MV2[gcp_cost_metrics.yaml<br/>📊 KPIs & Measures]
+    MV3[cloud_cost_metrics.yaml<br/>📊 Unified Metrics]
+
+    D1[🎨 AWS Dashboard]
+    D2[🎨 GCP Dashboard]
+    D3[🎨 Cloud Cost Explorer<br/>Multi-Cloud + Revenue]
+
+    M4 --> MV1
+    M4 --> MV2
+    M4 --> MV3
+
+    MV1 --> D1
+    MV2 --> D2
+    MV3 --> D3
+end
+
+style P1 fill:#4A90E2,stroke:#2E5C8A,color:#fff
+style P2 fill:#4A90E2,stroke:#2E5C8A,color:#fff
+style P3 fill:#4A90E2,stroke:#2E5C8A,color:#fff
+style N1 fill:#9B59B6,stroke:#7D3C98,color:#fff
+style N2 fill:#9B59B6,stroke:#7D3C98,color:#fff
+style M4 fill:#E74C3C,stroke:#C0392B,color:#fff
+style MV3 fill:#27AE60,stroke:#1E8449,color:#fff
+style D3 fill:#F39C12,stroke:#D68910,color:#fff
+
+```
+
 ## Features
 
 - **Multi-Cloud Cost Tracking** - AWS, GCP, and future cloud providers
