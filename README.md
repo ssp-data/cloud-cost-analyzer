@@ -20,7 +20,7 @@ subgraph "1: EXTRACT (dlt)"
 end
 
 subgraph "2: NORMALIZE (Python + DuckDB)"
-    N1[normalize.py<br/>🔧 Flatten MAP columns]
+    N1[normalize.py<br/>🔧 Flatten MAP columns<br/>(CUR 2.0 is flat already)]
     N2[normalize_gcp.py<br/>🔧 Flatten nested data]
 
     P1 --> N1
@@ -29,12 +29,13 @@ subgraph "2: NORMALIZE (Python + DuckDB)"
 end
 
 subgraph "3: RAW STORAGE (Parquet)"
-    R1[data/aws_costs/<br/>normalized.parquet]
+    R1[data/aws_costs/<br/>cur_export_test_00001/<br/>*.parquet]
     R2[data/gcp_costs/<br/>normalized.parquet]
     R3[data/stripe_costs/<br/>balance_transaction.parquet]
 
-    N1 --> R1
+    N1 -.-> R1
     N2 --> R2
+    P1 --> R1
 end
 
 subgraph "4: MODEL (SQL - Star Schema)"
@@ -80,6 +81,14 @@ style MV3 fill:#27AE60,stroke:#1E8449,color:#fff
 style D3 fill:#F39C12,stroke:#D68910,color:#fff
 
 ```
+
+### Key Notes on Data Flow:
+
+**AWS CUR 2.0 Format**: Modern AWS Cost and Usage Reports export in Parquet format with already-flattened columns. The `normalize.py` script exists for backward compatibility with older CUR formats that contained nested MAP columns (like resource tags), but for CUR 2.0, it acts as a pass-through operation—no transformation occurs.
+
+**GCP Billing Export**: Google Cloud exports use nested structures (e.g., `service__description`, `location__country`) that require flattening via `normalize_gcp.py` to make them accessible for analytics.
+
+**Stripe**: Revenue data comes pre-normalized from the Stripe API and requires no additional processing.
 
 ## Features
 
