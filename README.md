@@ -28,8 +28,7 @@ Opens at http://localhost:9009 with sample data.
 
 ## How it works
 
-
-### How to Use: Seperate commands to run
+Once setup, we can run these seperate commands to run:
 ```sh
   # View static dashboards (always available)
   make serve
@@ -43,6 +42,12 @@ Opens at http://localhost:9009 with sample data.
 
 
 ## Setup
+We need to get the Cost reports and the credentials properly setup.
+
+First we clone the project, isntall dependencies, then we setup the cost reports for each cloud provider and at the end, we need to set `.dlt/secrets.toml` and `.dlt/config.toml` to match your data. 
+
+Below step by step how to create a cost report and extract the keys. Also check [related blog post](http://www.ssp.sh/blog/cost-analyzer-aws-gcp/) for more details.
+
 
 ### 1. Install Dependencies
 
@@ -52,7 +57,6 @@ cd cloud-cost-analyzer
 uv sync  # Installs all packages from pyproject.toml
 ```
 
-Then we need to set `.dlt/secrets.toml` and `.dlt/config.toml` to match your data. Below step by step how to create a cost report and extract the keys. Also check [related blog post](http://www.ssp.sh/blog/cost-analyzer-aws-gcp/) for more details.
 
 ### 2. Configure Data Sources
 
