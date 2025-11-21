@@ -17,7 +17,7 @@ Multi-cloud cost analytics platform combining AWS Cost and Usage Reports (CUR), 
 
 Try without any credentials:
 ```bash
-git clone git@github.com:ssp-data/cloud-cost-analyzer.git
+git clone https://github.com/ssp-data/cloud-cost-analyzer.git
 cd cloud-cost-analyzer
 make demo
 ```
@@ -47,7 +47,7 @@ Opens at http://localhost:9009 with sample data.
 ### 1. Install Dependencies
 
 ```bash
-git clone git@github.com:ssp-data/cloud-cost-analyzer.git
+git clone https://github.com/ssp-data/cloud-cost-analyzer.git
 cd cloud-cost-analyzer
 uv sync  # Installs all packages from pyproject.toml
 ```
