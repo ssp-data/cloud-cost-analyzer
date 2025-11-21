@@ -69,6 +69,23 @@ test: test-duplicates
 serve:
 	rill start viz_rill
 
+demo:
+	@echo "================================================================================"
+	@echo "Running in DEMO mode with sample data"
+	@echo "================================================================================"
+	@echo ""
+	@echo "Clearing existing data directory..."
+	@rm -rf viz_rill/data
+	@mkdir -p viz_rill/data
+	@echo "Copying demo data to viz_rill/data/..."
+	@cp -r viz_rill/data_demo/* viz_rill/data/
+	@echo "✅ Demo data copied successfully"
+	@echo ""
+	@echo "Starting Rill dashboards with demo data..."
+	@echo "NOTE: Run 'make clear' before running 'make run-all' to use real data"
+	@echo ""
+	rill start viz_rill
+
 ## AWS Advanced Analytics (CUR Wizard integration)
 aws-normalize:
 	@echo "Normalizing AWS CUR data..."
