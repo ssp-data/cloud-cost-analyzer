@@ -26,19 +26,21 @@ install-rill:
 		echo "Rill is not installed"; \
 		echo "================================================================================"; \
 		echo ""; \
-		echo "Rill is required to run the visualization dashboards."; \
-		echo ""; \
-		read -p "Would you like to install Rill now? (y/N): " answer; \
+		if [ ! -t 0 ]; then \
+			echo "⚠️  Non-interactive mode detected - skipping installation"; \
+			echo "Please install Rill manually: curl https://rill.sh | sh"; \
+			exit 1; \
+		fi; \
+		read -p "Install Rill now? (y/N): " answer; \
 		if [ "$$answer" = "y" ] || [ "$$answer" = "Y" ]; then \
-			echo "Installing Rill..."; \
 			curl -fsSL https://rill.sh | sh; \
-			echo "✅ Rill installed successfully"; \
+			echo ""; \
+			echo "⚠️  Rill installed. You may need to update your PATH:"; \
+			echo "   export PATH=\"\$$HOME/.rill:\$$PATH\""; \
+			echo ""; \
 		else \
-			echo ""; \
-			echo "Skipping Rill installation."; \
-			echo "You can install it later by running: make install-rill"; \
-			echo "Or manually with: curl https://rill.sh | sh"; \
-			echo ""; \
+			echo "Skipped. Install later with: curl https://rill.sh | sh"; \
+			exit 1; \
 		fi; \
 	fi
 
