@@ -17,7 +17,10 @@ check-secrets:
 		exit 1; \
 	fi
 
-install:
+install-rill:
+  curl https://rill.sh | sh
+
+install: install-rill
 	mkdir -p viz_rill/data/
 	uv sync
 
@@ -69,7 +72,7 @@ test: test-duplicates
 serve:
 	rill start viz_rill
 
-demo:
+demo: install-rill
 	@echo "================================================================================"
 	@echo "Running in DEMO mode with sample data"
 	@echo "================================================================================"
