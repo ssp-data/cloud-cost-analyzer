@@ -18,7 +18,29 @@ check-secrets:
 	fi
 
 install-rill:
-  curl https://rill.sh | sh
+	@if command -v rill >/dev/null 2>&1; then \
+		echo "✅ Rill is already installed (version: $$(rill version 2>/dev/null || echo 'unknown'))"; \
+	else \
+		echo ""; \
+		echo "================================================================================"; \
+		echo "Rill is not installed"; \
+		echo "================================================================================"; \
+		echo ""; \
+		echo "Rill is required to run the visualization dashboards."; \
+		echo ""; \
+		read -p "Would you like to install Rill now? (y/N): " answer; \
+		if [ "$$answer" = "y" ] || [ "$$answer" = "Y" ]; then \
+			echo "Installing Rill..."; \
+			curl -fsSL https://rill.sh | sh; \
+			echo "✅ Rill installed successfully"; \
+		else \
+			echo ""; \
+			echo "Skipping Rill installation."; \
+			echo "You can install it later by running: make install-rill"; \
+			echo "Or manually with: curl https://rill.sh | sh"; \
+			echo ""; \
+		fi; \
+	fi
 
 install: install-rill
 	mkdir -p viz_rill/data/
