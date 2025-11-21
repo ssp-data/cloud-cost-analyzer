@@ -13,14 +13,21 @@ Multi-cloud cost analytics platform combining AWS Cost and Usage Reports (CUR), 
 - **Advanced Analytics** - RI/SP utilization, unit economics, effective cost tracking (adapted from [aws-cur-wizard](https://github.com/Twing-Data/aws-cur-wizard))
 - **Dynamic Dashboards** - Powered by Rill visualizations
 
-## How it works
+## Quick Start with Demo Data
 
-Setup secrets and configs, and then run:
-```
+Try without any credentials:
+```bash
 git clone git@github.com:ssp-data/cloud-cost-analyzer.git
 cd cloud-cost-analyzer
-make run-all
+make demo
 ```
+
+Opens at http://localhost:9009 with sample data.
+
+**Note**: Run `make clear` before `make run-all` to switch to real data.
+
+## How it works
+
 
 ### How to Use: Seperate commands to run
 ```sh
@@ -44,6 +51,8 @@ git clone git@github.com:ssp-data/cloud-cost-analyzer.git
 cd cloud-cost-analyzer
 uv sync  # Installs all packages from pyproject.toml
 ```
+
+Then we need to set `.dlt/secrets.toml` and `.dlt/config.toml` to match your data. Below step by step how to create a cost report and extract the keys. Also check [related blog post](http://www.ssp.sh/blog/cost-analyzer-aws-gcp/) for more details.
 
 ### 2. Configure Data Sources
 
