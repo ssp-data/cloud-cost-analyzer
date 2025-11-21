@@ -24,7 +24,8 @@ make demo
 
 Opens at http://localhost:9009 with sample data.
 
-**Note**: Run `make clear` before `make run-all` to switch to real data.
+- **Note 1**: Rill tries to be installed during that process. But best to have it install first with: `curl https://rill.sh | sh`
+- **Note 2**: Run `make clear` before `make run-all` to switch to real data.
 
 ## How it works
 
