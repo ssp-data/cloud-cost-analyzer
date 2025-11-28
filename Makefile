@@ -46,6 +46,13 @@ install-rill:
 
 install: install-rill
 	mkdir -p viz_rill/data/
+	@if [ ! -f viz_rill/.env ]; then \
+		echo "📋 Copying viz_rill/.env.example to viz_rill/.env"; \
+		cp viz_rill/.env.example viz_rill/.env; \
+		echo "✅ Created viz_rill/.env (you can edit it later if needed)"; \
+	else \
+		echo "✅ viz_rill/.env already exists"; \
+	fi
 	uv sync
 
 dlt-clear:

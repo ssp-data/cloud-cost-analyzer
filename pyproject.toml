@@ -19,5 +19,7 @@ dependencies = [
     "duckdb>=1.4.2",
     "jinja2>=3.1.6",
     "python-dotenv>=1.2.1",
+    #clickkouse
+    "dlt[clickhouse]",
     "clickhouse-connect>=0.10.0",
 ]
