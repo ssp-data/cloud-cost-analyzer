@@ -9,6 +9,8 @@ Multi-cloud cost analytics platform combining AWS Cost and Usage Reports (CUR), 
 ## Essential Commands
 
 ### Development Workflow
+
+**Local Development (Parquet Files):**
 ```bash
 # Install dependencies
 uv sync
@@ -16,17 +18,37 @@ uv sync
 # Run complete ETL + visualization pipeline
 make run-all
 
-# Run individual pipelines
+# Run individual pipelines (writes parquet to viz_rill/data/)
 make run-aws      # AWS CUR from S3
 make run-gcp      # GCP billing from BigQuery
 make run-stripe   # Stripe revenue data
 
-# Run all ETL pipelines
+# Run all ETL pipelines (local)
 make run-etl
 
 # Start Rill dashboards (port 9009)
 make serve
+```
 
+**Production (ClickHouse Cloud):**
+```bash
+# Initialize ClickHouse (run once)
+make init-clickhouse
+
+# Run all ETL pipelines to ClickHouse
+make run-etl-clickhouse
+
+# Run individual pipelines to ClickHouse
+make run-aws-clickhouse
+make run-gcp-clickhouse
+make run-stripe-clickhouse
+
+# Ingest normalized data to ClickHouse (optional)
+make ingest-normalized-clickhouse
+```
+
+**Normalization & Dashboard Generation:**
+```bash
 # Generate dynamic AWS dashboards (optional)
 make aws-dashboards      # Normalize + generate AWS canvases
 make aws-normalize       # Just normalize AWS data
@@ -59,18 +81,35 @@ uv run python pipelines/stripe_pipeline.py
 ## Architecture
 
 ### Data Flow
+
+**Local Development:**
 ```
-Cloud Providers → dlt Pipelines → Parquet Files → Rill Dashboards
-                                ↓
-                            viz_rill/data/
-                              ├── aws_costs/
-                              ├── gcp_costs/
-                              └── stripe_costs/
+Cloud Providers → dlt Pipelines (filesystem) → Parquet Files → Rill Local
+                                              ↓
+                                          viz_rill/data/
+                                            ├── aws_costs/
+                                            ├── gcp_costs/
+                                            └── stripe_costs/
 ```
+
+**Production (GitHub Actions):**
+```
+Cloud Providers → dlt Pipelines (clickhouse) → ClickHouse Cloud → Rill Cloud / BI Tools
+                                              ↓
+                                          dlt.aws_costs__*
+                                          dlt.gcp_costs__*
+                                          dlt.stripe_costs__*
+```
+
+**Environment Variable Controls Destination:**
+- `DLT_DESTINATION=filesystem` (default) → Local parquet files
+- `DLT_DESTINATION=clickhouse` → ClickHouse Cloud
 
 ### Pipeline System (dlt-based)
 
-**Key Architecture Pattern**: All pipelines use `destination="filesystem"` with `loader_file_format="parquet"` to write directly to `viz_rill/data/` for Rill consumption.
+**Key Architecture Pattern**: All pipelines support dual destinations via `DLT_DESTINATION` environment variable:
+- **Local**: `destination="filesystem"` with `loader_file_format="parquet"` writes to `viz_rill/data/`
+- **Production**: `destination="clickhouse"` writes directly to ClickHouse Cloud
 
 **Three Independent Pipelines**:
 
@@ -149,6 +188,14 @@ Located in `viz_rill/` - contains both static and dynamically generated dashboar
 
 **All configuration is now centralized in `.dlt/config.toml` and `.dlt/secrets.toml`** - no need to edit pipeline files!
 
+### Dual Destination Support
+
+The pipelines automatically switch destinations based on the `DLT_DESTINATION` environment variable:
+- Not set or `filesystem` → Local development (parquet files)
+- `clickhouse` → Production (ClickHouse Cloud)
+
+### Configuration Files
+
 1. `.dlt/config.toml` - Update these values:
    ```toml
    # Pipeline configuration (shared across all pipelines)
@@ -191,17 +238,30 @@ Located in `viz_rill/` - contains both static and dynamically generated dashboar
 
    [sources.stripe_analytics]
    stripe_secret_key = "sk_live_..."
+
+   # ClickHouse credentials (for production deployment)
+   [destination.clickhouse.credentials]
+   host = "xxxxx.europe-west4.gcp.clickhouse.cloud"
+   port = 8443
+   username = "default"
+   password = "your-password"
+   secure = 1
    ```
+
+See `.dlt/secrets.toml.example` for template.
 
 ## Project Structure
 
 ```
 cloud-cost-analyzer/
 ├── pipelines/              # dlt ETL pipelines
-│   ├── aws_pipeline.py              # AWS CUR from S3
-│   ├── google_bq_incremental_pipeline.py  # GCP BigQuery billing
-│   ├── stripe_pipeline.py           # Stripe revenue data
-│   └── helpers/                     # Stripe analytics helper modules
+│   ├── aws_pipeline.py                      # AWS CUR (dual destination)
+│   ├── google_bq_incremental_pipeline.py    # GCP BigQuery (dual destination)
+│   ├── stripe_pipeline.py                   # Stripe revenue (dual destination)
+│   ├── ingest_normalized_pipeline.py        # Normalized data → ClickHouse
+│   └── helpers/                             # Stripe analytics helper modules
+├── scripts/                # Utility scripts
+│   └── init_clickhouse.py           # Initialize ClickHouse database
 ├── viz_rill/               # Rill visualization project
 │   ├── dashboards/                  # Static dashboards (version controlled)
 │   ├── sources/                     # Data source definitions
@@ -217,16 +277,23 @@ cloud-cost-analyzer/
 │   ├── test_duplicates.sql          # DuckDB duplicate checks
 │   └── test_duplicates_parquet.sql  # Parquet duplicate checks
 ├── .dlt/                   # dlt configuration
-│   ├── config.toml                  # Pipeline configuration
-│   └── secrets.toml                 # Credentials (not in git)
+│   ├── config.toml                  # Pipeline configuration (both destinations)
+│   ├── secrets.toml                 # Credentials (not in git)
+│   └── secrets.toml.example         # Credentials template
+├── .github/workflows/      # GitHub Actions
+│   └── etl-pipeline.yml             # Production ETL workflow
 ├── Makefile               # All workflow commands
-└── pyproject.toml         # Python dependencies (managed by uv)
+├── pyproject.toml         # Python dependencies (managed by uv)
+├── CLAUDE.md              # This file
+└── CLICKHOUSE_SETUP.md    # ClickHouse deployment guide
 ```
 
 ## Important Implementation Notes
 
 **When Modifying Pipelines**:
-- Always use `destination="filesystem"` and `loader_file_format="parquet"` in `pipeline.run()`
+- Use environment variable to control destination: `destination = os.getenv("DLT_DESTINATION", "filesystem")`
+- For filesystem destination: Use `loader_file_format="parquet"` in `pipeline.run()`
+- For ClickHouse destination: Omit `loader_file_format` parameter (auto-handled)
 - For AWS: Use `write_disposition="merge"` with primary keys to prevent duplicates
 - For GCP/Stripe: Use `write_disposition="append"` as data is naturally append-only
 - **All configuration values must be read from `dlt.config`** - never hardcode!
@@ -262,3 +329,24 @@ cloud-cost-analyzer/
 ## Currency Handling
 
 The project includes CHF to USD conversion for GCP costs. Check `viz_rill/cur-wizard/scripts/normalize_gcp.py` for conversion logic.
+
+## ClickHouse Cloud Deployment
+
+For production deployment to ClickHouse Cloud with GitHub Actions, see **CLICKHOUSE_SETUP.md** for:
+- Setting up ClickHouse Cloud account
+- Configuring GitHub Secrets
+- Running pipelines to ClickHouse
+- Connecting Rill Cloud or BI tools
+- Migration strategy from local to production
+
+**Quick Start:**
+```bash
+# 1. Add ClickHouse credentials to .dlt/secrets.toml
+# 2. Initialize database
+make init-clickhouse
+
+# 3. Test locally
+make run-etl-clickhouse
+
+# 4. Configure GitHub Secrets and enable workflow
+```

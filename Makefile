@@ -152,3 +152,30 @@ gcp-dashboards: gcp-normalize gcp-generate-dashboards
 # 2. normalizes AWS & GCP cost reports and generates Rill dashboards
 # 3. starts Rill BI and opens in browser
 run-all: install run-etl aws-normalize gcp-normalize serve
+
+
+
+## Production / ClickHouse (writes directly to ClickHouse Cloud)
+run-aws-clickhouse:
+	DLT_DESTINATION=clickhouse uv run python pipelines/aws_pipeline.py
+	echo "####################################################################"
+run-gcp-clickhouse:
+	DLT_DESTINATION=clickhouse uv run python pipelines/google_bq_incremental_pipeline.py
+	echo "####################################################################"
+run-stripe-clickhouse:
+	DLT_DESTINATION=clickhouse uv run python pipelines/stripe_pipeline.py
+	echo "####################################################################"
+
+# Run dlt incremental loads (production - clickhouse destination)
+run-etl-clickhouse: run-aws-clickhouse run-gcp-clickhouse run-stripe-clickhouse
+	@echo "✅ ClickHouse ETL complete (data in ClickHouse Cloud)"
+
+# Initialize ClickHouse database (run once before first use)
+init-clickhouse:
+	@echo "Initializing ClickHouse database..."
+	uv run python scripts/init_clickhouse.py
+
+# Ingest normalized data to ClickHouse
+ingest-normalized-clickhouse:
+	@echo "Ingesting normalized AWS & GCP data to ClickHouse..."
+	DLT_DESTINATION=clickhouse uv run python pipelines/ingest_normalized_pipeline.py
