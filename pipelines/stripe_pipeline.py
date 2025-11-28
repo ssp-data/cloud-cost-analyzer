@@ -1,4 +1,5 @@
 from typing import Optional, Tuple
+import os
 
 import dlt
 from pendulum import DateTime
@@ -30,6 +31,9 @@ def load_data(
         start_date: An optional start date to limit the data retrieved. Defaults to None.
         end_date: An optional end date to limit the data retrieved. Defaults to None.
     """
+    # Determine destination from environment variable (default: filesystem for local dev)
+    destination = os.getenv("DLT_DESTINATION", "filesystem")
+
     # Load configuration from config.toml
     try:
         pipeline_name = dlt.config["pipeline.pipeline_name"]
@@ -41,10 +45,10 @@ def load_data(
     except KeyError:
         dataset_name = "stripe_costs"
 
-    # Using filesystem destination to write parquet files for Rill
+    # Create pipeline with environment-driven destination
     pipeline = dlt.pipeline(
         pipeline_name=pipeline_name,
-        destination="filesystem",
+        destination=destination,
         dataset_name=dataset_name,
         # export_schema_path="exported_schema/stripe_cost_schema.json",
     )
@@ -101,6 +105,9 @@ def load_incremental_endpoints(
     except KeyError:
         dataset_name = "stripe_costs"
 
+    # Determine destination from environment variable (default: filesystem for local dev)
+    destination = os.getenv("DLT_DESTINATION", "filesystem")
+
     # Get initial start date from config if not provided (optional)
     if initial_start_date is None:
         try:
@@ -111,10 +118,10 @@ def load_incremental_endpoints(
         except KeyError:
             pass  # Keep as None if not in config
 
-    # Using filesystem destination to write parquet files for Rill
+    # Create pipeline with environment-driven destination
     pipeline = dlt.pipeline(
         pipeline_name=pipeline_name,
-        destination="filesystem",
+        destination=destination,
         dataset_name=dataset_name,
         # export_schema_path="exported_schema/stripe_cost_schema.json",
     )

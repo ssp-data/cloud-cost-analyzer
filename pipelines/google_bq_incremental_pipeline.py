@@ -63,7 +63,10 @@ def bigquery_billing_table(
 
 
 def load_standalone_table_resource() -> None:
-    """Load BigQuery billing export tables into DuckDB"""
+    """Load BigQuery billing export tables with environment-driven destination"""
+
+    # Determine destination from environment variable (default: filesystem for local dev)
+    destination = os.getenv("DLT_DESTINATION", "filesystem")
 
     # Load configuration from config.toml
     try:
@@ -86,11 +89,12 @@ def load_standalone_table_resource() -> None:
     dataset = dlt.config["sources.gcp_billing.dataset"]
     table_names = dlt.config["sources.gcp_billing.table_names"]
 
-    # Create pipeline to write parquet files for Rill
-    # Using filesystem destination to write parquet files
+    # Create pipeline with environment-driven destination
+    # Local: destination="filesystem" writes parquet to viz_rill/data/
+    # Production: destination="clickhouse" writes directly to ClickHouse Cloud
     pipeline = dlt.pipeline(
         pipeline_name=pipeline_name,
-        destination="filesystem",
+        destination=destination,
         dataset_name=dataset_name,
         # export_schema_path="exported_schema/google_cost_schema.json"
     )

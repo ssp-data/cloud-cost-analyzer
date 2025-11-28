@@ -5,12 +5,18 @@ log_level="ERROR"  # ERROR hides warning as stripe has many tables that with pot
 # use the dlthub_telemetry setting to enable/disable anonymous usage data reporting, see https://dlthub.com/docs/reference/telemetry
 dlthub_telemetry = false
 
-# Filesystem destination configuration - writes parquet files for Rill
+# Filesystem destination configuration - writes parquet files for Rill (local development)
 [destination.filesystem]
 bucket_url = "viz_rill/data"  # Output directory for parquet files
 
 [destination.filesystem.loader_file_format]
 file_format = "parquet"
+
+# ClickHouse destination configuration (production - GitHub Actions)
+# Credentials are in secrets.toml
+[destination.clickhouse]
+database = "dlt"
+dataset_name_prefix = ""  # No prefix for clean dataset names
 
 [sources.filesystem]
 local_dir = "/home/sspaeti/Documents/datalake/dlt-stage" # fill this in!
