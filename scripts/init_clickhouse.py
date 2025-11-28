@@ -12,35 +12,31 @@ import sys
 import dlt
 import clickhouse_connect
 
-
 def init_clickhouse():
     """Initialize ClickHouse database with required permissions."""
 
     # Get ClickHouse connection details from secrets.toml
     try:
         host = dlt.secrets.get("destination.clickhouse.credentials.host")
-        port = dlt.secrets.get("destination.clickhouse.credentials.port", 8443)
-        username = dlt.secrets.get("destination.clickhouse.credentials.username", "default")
+        username = dlt.secrets.get("destination.clickhouse.credentials.username")
         password = dlt.secrets.get("destination.clickhouse.credentials.password")
-        secure = dlt.secrets.get("destination.clickhouse.credentials.secure", 1)
+        secure = dlt.secrets.get("destination.clickhouse.credentials.secure")
     except Exception as e:
         print(f"❌ Error reading ClickHouse credentials from .dlt/secrets.toml: {e}")
         print("\nMake sure you have configured:")
         print("[destination.clickhouse.credentials]")
         print("host = 'your-host.clickhouse.cloud'")
-        print("port = 8443")
         print("username = 'default'")
         print("password = 'your-password'")
         print("secure = 1")
         sys.exit(1)
 
-    print(f"Connecting to ClickHouse at {host}:{port}...")
+    print(f"Connecting to ClickHouse at {host}...")
 
     try:
         # Connect as admin user (usually 'default')
         client = clickhouse_connect.get_client(
             host=host,
-            port=port,
             username=username,
             password=password,
             secure=bool(secure)
