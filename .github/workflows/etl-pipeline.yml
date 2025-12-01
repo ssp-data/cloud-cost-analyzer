@@ -37,7 +37,7 @@ jobs:
           cat > .dlt/secrets.toml << 'EOF'
           # ClickHouse destination credentials
           [destination.clickhouse.credentials]
-          host = "${{ secrets.CLICKHOUSE_HOST }}:8443"
+          host = "${{ secrets.CLICKHOUSE_HOST }}"
           port = 8443
           username = "${{ secrets.CLICKHOUSE_USERNAME }}"
           password = "${{ secrets.CLICKHOUSE_PASSWORD }}"
