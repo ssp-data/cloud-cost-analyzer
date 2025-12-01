@@ -1,0 +1,71 @@
+name: Clear ClickHouse Data
+
+on:
+  workflow_dispatch:  # Manual trigger only (for safety)
+    inputs:
+      confirm:
+        description: 'Type "yes" to confirm deletion of ALL ClickHouse tables'
+        required: true
+        type: string
+
+jobs:
+  clear-clickhouse:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "yes" ]; then
+            echo "❌ Deletion not confirmed. You must type 'yes' to proceed."
+            exit 1
+          fi
+          echo "✅ Deletion confirmed. Proceeding..."
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Create dlt secrets
+        run: |
+          mkdir -p .dlt
+          cat > .dlt/secrets.toml << 'EOF'
+          # ClickHouse destination credentials
+          [destination.clickhouse.credentials]
+          host = "${{ secrets.CLICKHOUSE_HOST }}"
+          port = 9440
+          username = "${{ secrets.CLICKHOUSE_USERNAME }}"
+          password = "${{ secrets.CLICKHOUSE_PASSWORD }}"
+          secure = 1
+          EOF
+
+      - name: Clear ClickHouse tables (force mode)
+        run: |
+          echo "⚠️  Force clearing all ClickHouse tables..."
+          echo "yes" | uv run python scripts/clear_clickhouse.py
+        continue-on-error: false
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ ClickHouse tables cleared successfully"
+          echo "Database: ${{ secrets.CLICKHOUSE_HOST }}"
+          echo ""
+          echo "Next steps:"
+          echo "  1. Run 'Cloud Cost ETL Pipeline' workflow to reload data"
+          echo "  2. Or run locally: make run-etl-clickhouse && make anonymize-clickhouse"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Failed to clear ClickHouse tables"
+          echo "Check the logs above for details"
