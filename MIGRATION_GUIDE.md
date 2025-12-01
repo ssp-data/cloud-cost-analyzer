@@ -345,7 +345,11 @@ sql: SELECT * FROM dlt.gcp_costs__bigquery_billing_table
 ### Step 5.3: Deploy to Rill Cloud
 
 ```bash
-rill deploy
+rill deploy \                                         ✘ INT
+--org demo \
+--path viz_rill \
+--public \
+--prod-branch main \
 ```
 
 Your dashboards now query ClickHouse Cloud in real-time!
