@@ -20,9 +20,8 @@ def get_clickhouse_client():
         host = dlt.secrets.get('destination.clickhouse.credentials.host')
         username = dlt.secrets.get('destination.clickhouse.credentials.username')
         password = dlt.secrets.get('destination.clickhouse.credentials.password')
-        # FIX: Get the raw value (string) without the default argument,
-        # then explicitly cast it to an integer for clickhouse_connect.
-        # port = dlt.secrets.get('destination.clickhouse.credentials.port', 9440) # 8443, locally and 9440 cloud
+        # did not work: port = dlt.secrets.get('destination.clickhouse.credentials.port', 9440) # 8443, locally and 9440 cloud
+        # 1. Bypass dlt validation conflict
         port_raw = dlt.secrets.get('destination.clickhouse.credentials.port')
         port = int(port_raw)
 
@@ -31,8 +30,10 @@ def get_clickhouse_client():
             port=port,
             username=username,
             password=password,
-            secure=True
-        )
+            secure=True,
+            # force the client to use the HTTP API (used on GitHub actions)
+            **interface='https'** )
+
         return client
     except Exception as e:
         print(f"Error connecting to ClickHouse: {e}")
