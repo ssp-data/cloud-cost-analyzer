@@ -45,8 +45,8 @@ Once setup, we can run these seperate commands to run:
 ```
 
 **Cloud deployment guides:**
-- [ANONYMIZATION.md](ANONYMIZATION.md) - Anonymize data for public dashboards
-- [viz_rill/CONNECTOR_SETUP.md](viz_rill/CONNECTOR_SETUP.md) - Connect Rill to ClickHouse
+- [CLICKHOUSE.md](CLICKHOUSE.md) - Complete ClickHouse Cloud setup, deployment, and switching guide
+- [ANONYMIZATION.md](ANONYMIZATION.md) - Data anonymization for public dashboards
 
 
 ## Setup
@@ -215,21 +215,32 @@ The `initial_start_date` parameter controls how far back to load historical data
 4. Copy the full table names into the config above
 
 **Note about AWS table_name and Rill dashboards:**
-If you change the AWS `table_name` from the default `cur_export_test_00001`, you'll also need to update two Rill files:
-- `viz_rill/models/aws_costs.sql` - Update the parquet path
-- `viz_rill/sources/aws_cost_normalized.yaml` - Update the parquet path
-- `viz_rill/.env` - Update `INPUT_DATA_DIR`
+If you change the AWS `table_name` from the default `cur_export_test_00001`, you'll also need to update the parquet path in `viz_rill/models/aws_costs.sql` (file has comments showing where).
 
-Both files have comments showing exactly where to update the table name.
+#### Cloud Deployment (ClickHouse)
+This repo supports both local (default) and cloud deployment:
 
-#### Switching to and between ClickHouse (and local mode)
-This repo works on cloud with ClickHouse and Rill Cloud, or locally with Parquet files and Rill locally. The default mode is locally, but if you want to run it yourself on ClickHouse, you can switch to it with these settings:
+- **Local mode** (default): Parquet files + Rill local server
+- **Cloud mode**: ClickHouse Cloud + Rill Cloud or local Rill
 
+To deploy to ClickHouse Cloud, see [CLICKHOUSE.md](CLICKHOUSE.md) for complete setup instructions including:
+- ClickHouse Cloud account setup
+- Switching between local and cloud modes
+- Data anonymization for public dashboards
+- GitHub Actions automation
+- Troubleshooting
+
+Short setup version:
+
+1. In rill.yaml change `olap_connector: clickhouse` to clickhouse
+2.. set `RILL_CONNECTOR="clickhouse"` in .env in `viz_rill/.env` and add DNS a valid path for ClickHouse`connector.clickhouse.dsn="https://<HOST>.europe-west4.gcp.clickhouse.cloud:8443?username=default&password=<PASSWORD>&secure=true&skip_verify=true"`
+3. use ENV `DLT_DESTINATION=clickhouse`, but it will be set automatically inside Makefile
 1. in rill.yaml change `olap_connector: clickhouse` to clickhouse
-3. set `RILL_CONNECTOR="clickhouse"` in .env in `viz_rill/.env` and add DNS a valid path for ClickHouse`connector.clickhouse.dsn="https://<HOST>.europe-west4.gcp.clickhouse.cloud:8443?username=default&password=<PASSWORD>&secure=true&skip_verify=true"`
-2. use ENV `DLT_DESTINATION=clickhouse`, but it will be set automatically inside Makefile
 
-After running the clickhouse pipeline with `make run-all-cloud`, it will load all data into clickhouse and serve rill from ClickHouse. More details in [ClickHouse Setup](CLICKHOUSE_SETUP.md).
+
+After running the clickhouse pipeline with `make run-all-cloud`, it will load all data into clickhouse and serve rill from ClickHouse. 
+
+Long version with details in [ClickHouse Setup](CLICKHOUSE.md). 
 
 ### 4. Run the Pipeline
 
@@ -406,6 +417,8 @@ make serve           # 3. View in browser
 
 ## Documentation
 
+- [CLICKHOUSE.md](CLICKHOUSE.md) - ClickHouse Cloud deployment, mode switching, and troubleshooting
+- [ANONYMIZATION.md](ANONYMIZATION.md) - Data anonymization for public dashboards
 - `viz_rill/README.md` - Dashboard structure and how the visualization layer works
 - `ATTRIBUTION.md` - Third-party components (aws-cur-wizard) used in this project
 

@@ -26,7 +26,7 @@ COST_MULTIPLIER_MIN=5.0 COST_MULTIPLIER_MAX=10.0 uv run python scripts/anonymize
 - `COST_MULTIPLIER_MAX` (default: 8.0) - Maximum cost multiplier
 - `DUPLICATE_ROWS` (default: 3) - Row duplication factor
 
-See [ANONYMIZATION.md](../ANONYMIZATION.md) for details.
+See [../ANONYMIZATION.md](../ANONYMIZATION.md) for complete anonymization guide.
 
 ## ClickHouse Management
 
