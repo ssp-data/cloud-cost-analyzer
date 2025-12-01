@@ -151,7 +151,7 @@ jobs:
           cd viz_rill
           rill deploy \
             --org demo \
-            --project viz_rill \
+            --path viz_rill \
             --public \
             --prod-branch main \
             # --api-token ${{ secrets.RILL_API_TOKEN }}
