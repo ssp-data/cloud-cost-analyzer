@@ -232,8 +232,8 @@ To deploy to ClickHouse Cloud, see [CLICKHOUSE.md](CLICKHOUSE.md) for complete s
 
 Short setup version:
 
-1. In rill.yaml change `olap_connector: clickhouse` to clickhouse
-2.. set `RILL_CONNECTOR="clickhouse"` in .env in `viz_rill/.env` and add DNS a valid path for ClickHouse`connector.clickhouse.dsn="https://<HOST>.europe-west4.gcp.clickhouse.cloud:8443?username=default&password=<PASSWORD>&secure=true&skip_verify=true"`
+1. In rill.yaml change `olap_connector: clickhouse` to clickhouse 
+2. set `RILL_CONNECTOR="clickhouse"` in .env in `viz_rill/.env` and add DNS a valid path for ClickHouse`connector.clickhouse.dsn="https://<HOST>.europe-west4.gcp.clickhouse.cloud:8443?username=default&password=<PASSWORD>&secure=true&skip_verify=true"`
 3. use ENV `DLT_DESTINATION=clickhouse`, but it will be set automatically inside Makefile
 1. in rill.yaml change `olap_connector: clickhouse` to clickhouse
 
