@@ -34,7 +34,7 @@ INPUT_DATA_DIR = pathlib.Path(input_data_dir_str).resolve()
 NORMALIZED_DATA_DIR.mkdir(parents=True, exist_ok=True)
 INPUT_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-output_path = NORMALIZED_DATA_DIR / "normalized.parquet"
+output_path = NORMALIZED_DATA_DIR / "normalized_aws.parquet"
 full_input_path = f"{INPUT_DATA_DIR}/*.parquet"
 
 # Check if any parquet files exist
