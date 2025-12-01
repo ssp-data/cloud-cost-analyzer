@@ -1,7 +1,7 @@
 .DS_Store
 
 # Rill
-#.env #no sensitive data, is optimized for this repo
+.env
 tmp
 .rillcloud
 

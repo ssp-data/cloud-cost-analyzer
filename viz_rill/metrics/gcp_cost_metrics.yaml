@@ -3,21 +3,17 @@ version: 1
 type: metrics_view
 
 display_name: GCP Cost Analytics
-model: gcp_cost_source
+model: gcp_costs
 timeseries: date
 smallest_time_grain: "day"
 
 dimensions:
-  - name: _dlt_parent_id
-    column: _dlt_parent_id
   - name: billing_account_id
     column: billing_account_id
   - name: cost_type
     column: cost_type
   - name: currency
     column: currency
-  - name: labels_goog_resource_type
-    column: labels_goog_resource_type
   - name: location__country
     column: location__country
   - name: location__location

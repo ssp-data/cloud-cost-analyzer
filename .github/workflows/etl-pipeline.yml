@@ -1,0 +1,147 @@
+name: Cloud Cost ETL Pipeline
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:  # Allow manual trigger
+    inputs:
+      include_normalized:
+        description: 'Also ingest normalized data to ClickHouse'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  run-etl:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Create dlt secrets
+        run: |
+          mkdir -p .dlt
+          cat > .dlt/secrets.toml << 'EOF'
+          # ClickHouse destination credentials
+          [destination.clickhouse.credentials]
+          host = "${{ secrets.CLICKHOUSE_HOST }}"
+          port = 8443
+          username = "${{ secrets.CLICKHOUSE_USERNAME }}"
+          password = "${{ secrets.CLICKHOUSE_PASSWORD }}"
+          secure = 1
+
+          # AWS credentials for S3 access
+          [sources.filesystem.credentials]
+          aws_access_key_id = "${{ secrets.AWS_ACCESS_KEY_ID }}"
+          aws_secret_access_key = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+
+          # GCP BigQuery service account credentials
+          [source.bigquery.credentials]
+          project_id = "${{ secrets.GCP_PROJECT_ID }}"
+          private_key = "${{ secrets.GCP_PRIVATE_KEY }}"
+          client_email = "${{ secrets.GCP_CLIENT_EMAIL }}"
+          token_uri = "https://oauth2.googleapis.com/token"
+
+          # Stripe API credentials
+          [sources.stripe_analytics]
+          stripe_secret_key = "${{ secrets.STRIPE_SECRET_KEY }}"
+          EOF
+
+      - name: Run AWS pipeline
+        env:
+          DLT_DESTINATION: clickhouse
+        run: uv run python pipelines/aws_pipeline.py
+        continue-on-error: false
+
+      - name: Run GCP pipeline
+        env:
+          DLT_DESTINATION: clickhouse
+        run: uv run python pipelines/google_bq_incremental_pipeline.py
+        continue-on-error: false
+
+      - name: Run Stripe pipeline
+        env:
+          DLT_DESTINATION: clickhouse
+        run: uv run python pipelines/stripe_pipeline.py
+        continue-on-error: false
+
+      - name: Anonymize data for public dashboards
+        run: uv run python scripts/anonymize_clickhouse.py
+        continue-on-error: false
+
+      - name: Normalize AWS data (optional - for advanced dashboards)
+        if: ${{ github.event.inputs.include_normalized == 'true' }}
+        run: |
+          cd viz_rill
+          uv run python cur-wizard/scripts/normalize.py
+        env:
+          NORMALIZED_DATA_DIR: data
+          INPUT_DATA_DIR: data/aws_costs/cur_export_test_00001
+
+      - name: Normalize GCP data (optional - for advanced dashboards)
+        if: ${{ github.event.inputs.include_normalized == 'true' }}
+        run: |
+          cd viz_rill
+          uv run python cur-wizard/scripts/normalize_gcp.py
+        env:
+          NORMALIZED_DATA_DIR: data
+          INPUT_DATA_DIR_GCP: data/gcp_costs
+
+      - name: Ingest normalized data to ClickHouse (optional)
+        if: ${{ github.event.inputs.include_normalized == 'true' }}
+        env:
+          DLT_DESTINATION: clickhouse
+        run: uv run python pipelines/ingest_normalized_pipeline.py
+        continue-on-error: true
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-logs-${{ github.run_id }}
+          path: |
+            ~/.local/share/dlt/**/*.log
+          retention-days: 7
+
+      - name: Install Rill CLI
+        run: curl https://rill.sh | sh
+
+      - name: Configure Rill Cloud environment
+        run: |
+          cd viz_rill
+          cat > .env << 'EOF'
+          RILL_CONNECTOR=clickhouse
+          connector.clickhouse.dsn=clickhouse://${{ secrets.CLICKHOUSE_USERNAME }}:${{ secrets.CLICKHOUSE_PASSWORD }}@${{ secrets.CLICKHOUSE_HOST }}:8443/default?secure=true
+          EOF
+
+      - name: Deploy to Rill Cloud
+        env:
+          RILL_API_TOKEN: ${{ secrets.RILL_API_TOKEN }}
+        run: |
+          cd viz_rill
+          rill deploy \
+            --org demo \
+            --project viz_rill \
+            --public \
+            --prod-branch cloud-implementation \
+            --api-token ${{ secrets.RILL_API_TOKEN }}
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ ETL pipeline completed successfully"
+          echo "Data loaded to ClickHouse at ${{ secrets.CLICKHOUSE_HOST }}"
+          echo "📊 Dashboards deployed to Rill Cloud: https://ui.rilldata.com/demo/viz_rill/"

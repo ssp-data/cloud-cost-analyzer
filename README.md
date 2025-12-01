@@ -37,9 +37,16 @@ Once setup, we can run these seperate commands to run:
   # Generate dynamic dashboards (optional)
   make aws-dashboards
 
-  # Complete workflow
+  # Complete workflow (local)
   make run-all
+
+  # Cloud deployment with anonymized data
+  make run-all-cloud
 ```
+
+**Cloud deployment guides:**
+- [CLICKHOUSE.md](CLICKHOUSE.md) - Complete ClickHouse Cloud setup, deployment, and switching guide
+- [ANONYMIZATION.md](ANONYMIZATION.md) - Data anonymization for public dashboards
 
 
 ## Setup
@@ -208,12 +215,32 @@ The `initial_start_date` parameter controls how far back to load historical data
 4. Copy the full table names into the config above
 
 **Note about AWS table_name and Rill dashboards:**
-If you change the AWS `table_name` from the default `cur_export_test_00001`, you'll also need to update two Rill files:
-- `viz_rill/models/aws_costs.sql` - Update the parquet path
-- `viz_rill/sources/aws_cost_normalized.yaml` - Update the parquet path
-- `viz_rill/.env` - Update `INPUT_DATA_DIR`
+If you change the AWS `table_name` from the default `cur_export_test_00001`, you'll also need to update the parquet path in `viz_rill/models/aws_costs.sql` (file has comments showing where).
 
-Both files have comments showing exactly where to update the table name.
+#### Cloud Deployment (ClickHouse)
+This repo supports both local (default) and cloud deployment:
+
+- **Local mode** (default): Parquet files + Rill local server
+- **Cloud mode**: ClickHouse Cloud + Rill Cloud or local Rill
+
+To deploy to ClickHouse Cloud, see [CLICKHOUSE.md](CLICKHOUSE.md) for complete setup instructions including:
+- ClickHouse Cloud account setup
+- Switching between local and cloud modes
+- Data anonymization for public dashboards
+- GitHub Actions automation
+- Troubleshooting
+
+Short setup version:
+
+1. In rill.yaml change `olap_connector: clickhouse` to clickhouse 
+2. set `RILL_CONNECTOR="clickhouse"` in .env in `viz_rill/.env` and add DNS a valid path for ClickHouse`connector.clickhouse.dsn="https://<HOST>.europe-west4.gcp.clickhouse.cloud:8443?username=default&password=<PASSWORD>&secure=true&skip_verify=true"`
+3. use ENV `DLT_DESTINATION=clickhouse`, but it will be set automatically inside Makefile
+1. in rill.yaml change `olap_connector: clickhouse` to clickhouse
+
+
+After running the clickhouse pipeline with `make run-all-cloud`, it will load all data into clickhouse and serve rill from ClickHouse. 
+
+Long version with details in [ClickHouse Setup](CLICKHOUSE.md). 
 
 ### 4. Run the Pipeline
 
@@ -376,6 +403,61 @@ make serve  # Opens Rill at http://localhost:9009
 
 See `viz_rill/README.md` for dashboard details and integration information.
 
+## Data Normalization (Optional)
+
+**TL;DR: Normalization is optional and only needed for dynamic dashboard generation.**
+
+### What Normalization Does
+
+The normalization scripts (`normalize.py`, `normalize_gcp.py`) flatten nested data structures (AWS resource_tags, GCP labels) and feed them to the dashboard generator from [aws-cur-wizard](https://github.com/Twing-Data/aws-cur-wizard).
+
+### Do You Need It?
+
+It works without also. The core dashboards work without normalization:
+- ✅ Static dashboards (`viz_rill/dashboards/*.yaml`) query raw data via models
+- ✅ Models use `SELECT *` to read all columns from raw parquet/ClickHouse
+- ✅ Everything works for both local and cloud deployment
+
+But it provides useful dashboards (alredy pre commited in this repo), but if you have different data, i'd suggest to run it. Normalization provides:
+- Auto-generated dimension-specific canvases (e.g., per-tag breakdowns)
+- Dynamic explorers based on discovered labels/tags
+- CUR Wizard's intelligent chart type selection
+
+### How to Generate Dynamic Dashboards
+
+**Important:** This only works in **local mode** (parquet files). ClickHouse mode doesn't create parquet files, so dynamic dashboard generation is unavailable.
+
+```bash
+# Local mode only - Generate AWS canvases (optional)
+make aws-dashboards  # Normalizes + generates canvases/explores/
+
+# Local mode only - Generate GCP canvases (optional)
+make gcp-dashboards  # Normalizes + generates canvases/explores/
+
+# View all dashboards (static + generated)
+make serve
+```
+
+**Generated files** (in `.gitignore` but can be committed):
+- `viz_rill/canvases/*.yaml` - Dimension-specific breakdowns
+- `viz_rill/explores/*.yaml` - Auto-generated explorers
+- `viz_rill/data/normalized_aws.parquet` - Flattened AWS data
+- `viz_rill/data/normalized_gcp.parquet` - Flattened GCP data
+
+### Feature Comparison: Local vs Cloud Mode
+
+| Feature | Local Mode (Parquet) | Cloud Mode (ClickHouse) |
+|---------|---------------------|------------------------|
+| Static dashboards | ✅ Always work | ✅ Always work |
+| Dynamic dashboard generation | ✅ `make aws-dashboards` | ❌ Not available* |
+| Data storage | Parquet files | ClickHouse Cloud |
+| Normalization | Optional | Not needed |
+| Best for | Development, dynamic canvases | Production, GitHub Actions |
+
+*ClickHouse doesn't create parquet files, so the dashboard generator can't analyze data. Static dashboards provide full functionality.
+
+See [CLICKHOUSE.md](CLICKHOUSE.md#advanced-normalization-optional) for more details.
+
 ## Complete Workflow
 
 ```bash
@@ -390,6 +472,8 @@ make serve           # 3. View in browser
 
 ## Documentation
 
+- [CLICKHOUSE.md](CLICKHOUSE.md) - ClickHouse Cloud deployment, mode switching, and troubleshooting
+- [ANONYMIZATION.md](ANONYMIZATION.md) - Data anonymization for public dashboards
 - `viz_rill/README.md` - Dashboard structure and how the visualization layer works
 - `ATTRIBUTION.md` - Third-party components (aws-cur-wizard) used in this project
 

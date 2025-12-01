@@ -1,15 +1,26 @@
 -- AWS Costs Model
--- Reads from dlt-generated parquet files in data/aws_costs/
--- NOTE: If you change table_name in .dlt/config.toml, update this path to match:
---       'data/aws_costs/YOUR_TABLE_NAME/*.parquet'
+-- Switches between DuckDB (parquet) and ClickHouse based on RILL_CONNECTOR env var
+-- Selects ALL columns + derived columns to maintain compatibility with existing dashboards
+
+{{ if .env.RILL_CONNECTOR }}
+-- ClickHouse: Query table directly
 SELECT
-  CAST(identity_time_interval AS DATE) AS date,
-  line_item_product_code,
-  product_region_code,
-  line_item_usage_type,
-  line_item_line_item_description,
-  line_item_usage_account_id,
-  line_item_unblended_cost,
-  line_item_currency_code
+  toDate(splitByChar('T', identity_time_interval)[1]) AS date,
+  COALESCE(product_servicecode, line_item_product_code, 'Unknown') AS product_product_name,
+  product_servicecode AS product_servicename,
+  *
+FROM aws_costs___cur_export_test_00001
+WHERE identity_time_interval IS NOT NULL
+
+{{ else }}
+-- DuckDB: Read from parquet files (default for local development)
+SELECT
+  
+  CAST(SPLIT_PART(identity_time_interval, 'T', 1) AS DATE) AS date,
+  COALESCE(product_servicecode, line_item_product_code, 'Unknown') AS product_product_name,
+  product_servicecode AS product_servicename,
+  *
 FROM read_parquet('data/aws_costs/cur_export_test_00001/*.parquet')
-WHERE line_item_unblended_cost IS NOT NULL
+WHERE identity_time_interval IS NOT NULL
+
+{{ end }}

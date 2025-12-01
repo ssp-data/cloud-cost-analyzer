@@ -1,0 +1,34 @@
+# GCP Labels Canvas (auto-generated)
+
+type: canvas
+display_name: "GCP Labels Analysis"
+
+defaults:
+  time_range: P30D
+  comparison_mode: time
+
+rows:
+  - items:
+      - leaderboard:
+          dimensions: [service__id]
+          measures: [total_cost]
+          num_rows: 15
+          metrics_view: gcp_cost_metrics
+          title: "service__id"
+        width: 12
+    height: 300px
+  - items:
+      - leaderboard:
+          dimensions: [service__description]
+          measures: [total_cost]
+          num_rows: 15
+          metrics_view: gcp_cost_metrics
+          title: "service__description"
+        width: 12
+    height: 300px
+
+time_ranges: [P7D, P30D, P3M, P6M, P12M]
+filters:
+  enable: true
+
+theme: theme

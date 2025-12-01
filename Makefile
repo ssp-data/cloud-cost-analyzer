@@ -46,6 +46,13 @@ install-rill:
 
 install: install-rill
 	mkdir -p viz_rill/data/
+	@if [ ! -f viz_rill/.env ]; then \
+		echo "📋 Copying viz_rill/.env.example to viz_rill/.env"; \
+		cp viz_rill/.env.example viz_rill/.env; \
+		echo "✅ Created viz_rill/.env (you can edit it later if needed)"; \
+	else \
+		echo "✅ viz_rill/.env already exists"; \
+	fi
 	uv sync
 
 dlt-clear:
@@ -64,7 +71,17 @@ clear-rill:
 	rm -rf viz_rill/tmp/
 	@echo "✅ Rill cache cleared"
 
+clear-clickhouse:
+	@echo "Clearing ClickHouse tables (interactive)..."
+	uv run python scripts/clear_clickhouse.py
+
+clear-clickhouse-force:
+	@echo "⚠️  Force clearing ClickHouse tables (non-interactive)..."
+	@echo "yes" | uv run python scripts/clear_clickhouse.py
+
 clear: dlt-clear clear-data clear-rill
+
+clear-all: clear clear-clickhouse
 
 
 run-aws: check-secrets
@@ -151,4 +168,66 @@ gcp-dashboards: gcp-normalize gcp-generate-dashboards
 # 1. load data incrementally
 # 2. normalizes AWS & GCP cost reports and generates Rill dashboards
 # 3. starts Rill BI and opens in browser
-run-all: install run-etl aws-normalize gcp-normalize serve
+run-all: install run-etl aws-dashboards gcp-dashboards serve
+
+
+
+## Production / ClickHouse (writes directly to ClickHouse Cloud)
+run-aws-clickhouse:
+	DLT_DESTINATION=clickhouse uv run python pipelines/aws_pipeline.py
+	echo "####################################################################"
+run-gcp-clickhouse:
+	DLT_DESTINATION=clickhouse uv run python pipelines/google_bq_incremental_pipeline.py
+	echo "####################################################################"
+run-stripe-clickhouse:
+	DLT_DESTINATION=clickhouse uv run python pipelines/stripe_pipeline.py
+	echo "####################################################################"
+
+# Run dlt incremental loads (production - clickhouse destination)
+run-etl-clickhouse: run-aws-clickhouse run-gcp-clickhouse run-stripe-clickhouse
+	@echo "✅ ClickHouse ETL complete (data in ClickHouse Cloud)"
+
+# Initialize ClickHouse database (run once before first use)
+init-clickhouse:
+	@echo "Initializing ClickHouse database..."
+	uv run python scripts/init_clickhouse.py
+
+# Ingest normalized data to ClickHouse
+ingest-normalized-clickhouse:
+	@echo "Ingesting normalized AWS & GCP data to ClickHouse..."
+	DLT_DESTINATION=clickhouse uv run python pipelines/ingest_normalized_pipeline.py
+
+## Cloud Deployment with Anonymization (for public demos)
+# Simple approach: Run normal ETL, then anonymize data directly in ClickHouse
+anonymize-clickhouse:
+	@echo ""
+	@echo "================================================================================"
+	@echo "Anonymizing ClickHouse Data for Public Demos"
+	@echo "================================================================================"
+	@echo ""
+	uv run python scripts/anonymize_clickhouse.py
+	@echo ""
+
+# Complete cloud pipeline with anonymization
+# Note: Dynamic dashboard generation (aws-dashboards/gcp-dashboards) requires local parquet files,
+# so it's excluded from cloud mode. Static dashboards work with ClickHouse via models.
+run-all-cloud: check-secrets run-etl-clickhouse anonymize-clickhouse serve
+	@echo ""
+	@echo "================================================================================"
+	@echo "✅ Cloud deployment complete with anonymized data!"
+	@echo "================================================================================"
+	@echo ""
+	@echo "Next steps:"
+	@echo "  1. Set RILL_CONNECTOR=clickhouse in viz_rill/.env"
+	@echo "  2. Run 'make serve' to view dashboards with ClickHouse data"
+	@echo "  3. Configure Rill Cloud to connect to your ClickHouse instance"
+	@echo ""
+	@echo "Useful commands:"
+	@echo "  make anonymize-clickhouse     # Re-anonymize data"
+	@echo "  make clear-clickhouse         # Drop all ClickHouse tables (interactive)"
+	@echo "  make clear-clickhouse-force   # Drop all ClickHouse tables (non-interactive)"
+	@echo ""
+	@echo "Customize anonymization with environment variables:"
+	@echo "  COST_MULTIPLIER_MIN=2.0 COST_MULTIPLIER_MAX=8.0 DUPLICATE_ROWS=3"
+	@echo ""
+	@echo "================================================================================"

@@ -1,32 +1,23 @@
 type: canvas
 display_name: Dynamic Tag Insights
-defaults: { time_range: P1M }
+defaults: { time_range: P12M }
 
 rows:
+
+  
+  
+  
+  
   - items:
       - leaderboard:
-          dimensions:
-            - product_product_family
-          measures:
-            - total_unblended_cost
-          num_rows: 15
+          dimensions: [ product_location ]
+          measures:   [ total_unblended_cost ]
+          num_rows:   10
           metrics_view: aws_cost_metrics
-          dimension_filters: product_product_family IN ('API Request', 'Storage', 'Data Transfer')
-          title: Product Product Family
-        width: 12
-    height: 280px
-  - items:
-      - leaderboard:
-          dimensions:
-            - product_location
-          measures:
-            - total_unblended_cost
-          num_rows: 10
-          metrics_view: aws_cost_metrics
-          dimension_filters: product_location IN ('US West (N. California)', 'EU
-            (Frankfurt)', 'EU (Paris)')
-          title: Product Location — Top
+          dimension_filters: product_location IN ('US East (N. Virginia)', 'US West (Oregon)')
+          title: "Product Location — Top"
         width: 6
+
       - pie_chart:
           color:
             field: product_location
@@ -37,22 +28,30 @@ rows:
             field: total_unblended_cost
             type: quantitative
           metrics_view: aws_cost_metrics
-          dimension_filters: product_location NIN ('US West (N. California)', 'EU
-            (Frankfurt)', 'EU (Paris)')
-          title: Product Location — Others
+          dimension_filters: product_location NIN ('US East (N. Virginia)', 'US West (Oregon)')
+          title: "Product Location — Others"
         width: 6
     height: 280px
+
+  
+  
+  
+  
+
+  
+  
+  
+  
   - items:
       - leaderboard:
-          dimensions:
-            - product_region_code
-          measures:
-            - total_unblended_cost
-          num_rows: 10
+          dimensions: [ product_region_code ]
+          measures:   [ total_unblended_cost ]
+          num_rows:   10
           metrics_view: aws_cost_metrics
-          dimension_filters: product_region_code IN ('us-west-1', 'eu-central-1', 'eu-west-3')
-          title: Product Region Code — Top
+          dimension_filters: product_region_code IN ('us-east-1', 'us-west-2')
+          title: "Product Region Code — Top"
         width: 6
+
       - pie_chart:
           color:
             field: product_region_code
@@ -63,11 +62,148 @@ rows:
             field: total_unblended_cost
             type: quantitative
           metrics_view: aws_cost_metrics
-          dimension_filters: product_region_code NIN ('us-west-1', 'eu-central-1', 'eu-west-3')
-          title: Product Region Code — Others
+          dimension_filters: product_region_code NIN ('us-east-1', 'us-west-2')
+          title: "Product Region Code — Others"
         width: 6
     height: 280px
 
-time_ranges: [ PT24H, P7D, P30D, P3M, P12M ]
+  
+  
+  
+  
+
+  
+  
+  
+  
+  - items:
+      - kpi_grid:
+          measures: [ total_unblended_cost ]
+          metrics_view: aws_cost_metrics
+          dimension_filters: product_servicecode IN ('AmazonRDS')
+          title: "Product Servicecode — AmazonRDS"
+        width: 4
+
+      - pie_chart:
+          color:
+            field: product_servicecode
+            type: nominal
+            innerRadius: 50
+            limit: 10
+          measure:
+            field: total_unblended_cost
+            type: quantitative
+          metrics_view: aws_cost_metrics
+          dimension_filters: product_servicecode NIN ('AmazonRDS')
+          title: "Product Servicecode — Other"
+        width: 8
+    height: 280px
+
+  
+  
+  
+  
+
+  
+  
+  
+  
+  - items:
+      - kpi_grid:
+          measures: [ total_unblended_cost ]
+          metrics_view: aws_cost_metrics
+          dimension_filters: product_operation IN ('CreateDBInstance:0005')
+          title: "Product Operation — CreateDBInstance:0005"
+        width: 4
+
+      - pie_chart:
+          color:
+            field: product_operation
+            type: nominal
+            innerRadius: 50
+            limit: 10
+          measure:
+            field: total_unblended_cost
+            type: quantitative
+          metrics_view: aws_cost_metrics
+          dimension_filters: product_operation NIN ('CreateDBInstance:0005')
+          title: "Product Operation — Other"
+        width: 8
+    height: 280px
+
+  
+  
+  
+  
+
+  
+  
+  
+  
+  - items:
+      - bar_chart:
+          
+          x:
+            field: product_product_family
+            type: nominal
+            limit: 10
+          
+
+          
+          color:
+            field: product_product_family
+            type: nominal
+            
+            limit: 10
+          measure:
+            field: total_unblended_cost
+            type: quantitative
+          
+          metrics_view: aws_cost_metrics
+          title: "Product Product Family"
+        width: 12
+    height: 280px
+  
+
+  
+  
+  
+  
+  - items:
+      - leaderboard:
+          
+
+          
+          dimensions: [ product_sku ]
+          measures:   [ total_unblended_cost ]
+          num_rows: 15
+          
+          metrics_view: aws_cost_metrics
+          title: "Product Sku"
+        width: 12
+    height: 280px
+  
+
+  
+  
+  
+  
+  - items:
+      - leaderboard:
+          
+
+          
+          dimensions: [ product_usagetype ]
+          measures:   [ total_unblended_cost ]
+          num_rows: 15
+          
+          metrics_view: aws_cost_metrics
+          title: "Product Usagetype"
+        width: 12
+    height: 280px
+  
+
+
+time_ranges: [PT24H, P7D, P30D, P3M, P12M]
 filters: { enable: true }
 theme: theme
