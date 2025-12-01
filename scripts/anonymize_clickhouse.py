@@ -15,12 +15,14 @@ import clickhouse_connect
 import dlt
 
 def get_clickhouse_client():
+
+
     """Get ClickHouse client from dlt credentials."""
     try:
         host = dlt.secrets.get('destination.clickhouse.credentials.host')
         username = dlt.secrets.get('destination.clickhouse.credentials.username')
         password = dlt.secrets.get('destination.clickhouse.credentials.password')
-        port = 8443
+        port = 8443 # Hardcoded for the secure HTTP port
 
         client = clickhouse_connect.get_client(
             host=host,
@@ -29,9 +31,11 @@ def get_clickhouse_client():
             password=password,
             secure=True,
             # force the client to use the HTTP API (used on GitHub actions)
-            **interface='https'** )
+            interface='https' 
+        )
 
         return client
+
     except Exception as e:
         print(f"Error connecting to ClickHouse: {e}")
         print("Make sure .dlt/secrets.toml has ClickHouse credentials")
