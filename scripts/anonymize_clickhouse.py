@@ -124,35 +124,63 @@ def anonymize_stripe_revenue(client, multiplier_min=2.0, multiplier_max=8.0):
             print(f"  ⚠ Skipped {col}: {e}")
 
 
-def duplicate_data(client, table, multiplier=3):
-    """Duplicate rows to generate more data."""
-    print(f"\n📈 Duplicating data in {table} ({multiplier}x)...")
+def spread_to_recent_dates(client, table, days_to_spread=30):
+    """
+    Spread existing data across recent dates by updating date columns.
+    This works around ClickHouse PRIMARY KEY constraints that prevent true duplication.
+    """
+    print(f"\n📅 Spreading data across recent {days_to_spread} days for {table}...")
 
     try:
         # Get current row count
         result = client.query(f"SELECT count() FROM {table}")
-        original_count = result.result_rows[0][0]
+        total_rows = result.result_rows[0][0]
 
-        if original_count == 0:
+        if total_rows == 0:
             print(f"  ⚠ Table is empty, skipping")
             return
 
-        # Insert duplicates with slight variations
-        for i in range(multiplier - 1):
+        # Different strategy per table based on their date columns
+        if "aws_costs" in table:
+            # AWS: identity_time_interval (part of PRIMARY KEY, can't update)
+            # Skip for now - PRIMARY KEY constraint prevents this
+            print(f"  ℹ️  AWS table has PRIMARY KEY on date column - keeping existing dates")
+            print(f"  ✓ {total_rows:,} rows available with multiplied costs")
+
+        elif "gcp_costs" in table:
+            # GCP: usage_start_time (can update, not part of PRIMARY KEY)
+            print(f"  → Updating GCP dates to spread across last {days_to_spread} days...")
+
+            # Update each row to a random date within the last N days
             sql = f"""
-            INSERT INTO {table}
-            SELECT * FROM {table}
-            LIMIT {original_count}
+            ALTER TABLE {table}
+            UPDATE usage_start_time = toDateTime(
+                DATE_SUB(day, (cityHash64(toString(usage_start_time), service__id, sku__id) % {days_to_spread}), today())
+            )
+            WHERE usage_start_time IS NOT NULL
             """
             client.command(sql)
+            print(f"  ✓ Updated {total_rows:,} rows to recent dates")
 
-        # Get new row count
-        result = client.query(f"SELECT count() FROM {table}")
-        new_count = result.result_rows[0][0]
+        elif "stripe_costs" in table:
+            # Stripe: created (Unix timestamp, can update if not PRIMARY KEY)
+            print(f"  → Updating Stripe dates to spread across last {days_to_spread} days...")
 
-        print(f"  ✓ {original_count} rows → {new_count} rows")
+            sql = f"""
+            ALTER TABLE {table}
+            UPDATE created = toInt64(toUnixTimestamp(
+                DATE_SUB(day, (cityHash64(toString(created), type) % {days_to_spread}), today())
+            ))
+            WHERE created IS NOT NULL
+            """
+            client.command(sql)
+            print(f"  ✓ Updated {total_rows:,} rows to recent dates")
+
+        else:
+            print(f"  ⚠ Unknown table type, skipping")
+
     except Exception as e:
-        print(f"  ⚠ Error duplicating: {e}")
+        print(f"  ⚠ Error updating dates: {e}")
 
 
 def main():
@@ -180,14 +208,13 @@ def main():
     anonymize_gcp_costs(client, multiplier_min, multiplier_max)
     anonymize_stripe_revenue(client, multiplier_min, multiplier_max)
 
-    # Duplicate data if requested
-    if duplicate_factor > 1:
-        print("\n" + "=" * 80)
-        print("Duplicating Data")
-        print("=" * 80)
-        duplicate_data(client, "aws_costs___cur_export_test_00001", duplicate_factor)
-        duplicate_data(client, "gcp_costs___bigquery_billing_table", duplicate_factor)
-        duplicate_data(client, "stripe_costs___balance_transaction", duplicate_factor)
+    # Spread data to recent dates
+    print("\n" + "=" * 80)
+    print("Spreading Data to Recent Dates")
+    print("=" * 80)
+    spread_to_recent_dates(client, "aws_costs___cur_export_test_00001", days_to_spread=30)
+    spread_to_recent_dates(client, "gcp_costs___bigquery_billing_table", days_to_spread=30)
+    spread_to_recent_dates(client, "stripe_costs___balance_transaction", days_to_spread=30)
 
     print("\n" + "=" * 80)
     print("✅ Anonymization complete!")

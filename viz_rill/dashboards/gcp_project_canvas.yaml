@@ -4,7 +4,7 @@ type: canvas
 display_name: "GCP Labels Analysis"
 
 defaults:
-  time_range: P30D
+  time_range: P3M
   comparison_mode: time
 
 rows:

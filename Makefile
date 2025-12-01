@@ -109,6 +109,12 @@ test-duplicates:
 
 test: test-duplicates
 
+rill-deploy:
+	rill deploy \
+	--org demo \
+	--path viz_rill \
+	--public \
+	--prod-branch main \
 
 serve:
 	rill start viz_rill
@@ -205,7 +211,12 @@ anonymize-clickhouse:
 	@echo "Anonymizing ClickHouse Data for Public Demos"
 	@echo "================================================================================"
 	@echo ""
-	uv run python scripts/anonymize_clickhouse.py
+	@if [ -f .env ]; then \
+		set -a; . ./.env; set +a; \
+		uv run python scripts/anonymize_clickhouse.py; \
+	else \
+		uv run python scripts/anonymize_clickhouse.py; \
+	fi
 	@echo ""
 
 # Complete cloud pipeline with anonymization

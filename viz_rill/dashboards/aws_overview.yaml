@@ -7,7 +7,7 @@ display_name: "AWS Cost Analytics"
 
 defaults:
   comparison_mode: time
-  time_range: P1M 
+  time_range: P3M 
 
 rows:
   # ═══════════════════════════════════════════════════════════
