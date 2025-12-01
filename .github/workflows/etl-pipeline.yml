@@ -127,7 +127,7 @@ jobs:
           curl -sSL -L "$LATEST_URL" -o "$ASSET_NAME"
           
           # 3. Handle extraction and PATH setup
-          unzip "$ASSET_NAME"
+          unzip -o "$ASSET_NAME"
           chmod +x rill
           INSTALL_DIR="$HOME/.rill/bin"
           mkdir -p "$INSTALL_DIR"
@@ -153,8 +153,8 @@ jobs:
             --org demo \
             --project viz_rill \
             --public \
-            --prod-branch cloud-implementation \
-            --api-token ${{ secrets.RILL_API_TOKEN }}
+            --prod-branch main \
+            # --api-token ${{ secrets.RILL_API_TOKEN }}
 
       - name: Notify on success
         if: success()
