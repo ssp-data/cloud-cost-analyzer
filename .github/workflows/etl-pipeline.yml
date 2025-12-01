@@ -78,6 +78,10 @@ jobs:
         run: uv run python pipelines/stripe_pipeline.py
         continue-on-error: false
 
+      - name: Anonymize data for public dashboards
+        run: uv run python scripts/anonymize_clickhouse.py
+        continue-on-error: false
+
       - name: Normalize AWS data (optional - for advanced dashboards)
         if: ${{ github.event.inputs.include_normalized == 'true' }}
         run: |
@@ -112,8 +116,32 @@ jobs:
             ~/.local/share/dlt/**/*.log
           retention-days: 7
 
+      - name: Install Rill CLI
+        run: curl https://rill.sh | sh
+
+      - name: Configure Rill Cloud environment
+        run: |
+          cd viz_rill
+          cat > .env << 'EOF'
+          RILL_CONNECTOR=clickhouse
+          connector.clickhouse.dsn=clickhouse://${{ secrets.CLICKHOUSE_USERNAME }}:${{ secrets.CLICKHOUSE_PASSWORD }}@${{ secrets.CLICKHOUSE_HOST }}:8443/default?secure=true
+          EOF
+
+      - name: Deploy to Rill Cloud
+        env:
+          RILL_API_TOKEN: ${{ secrets.RILL_API_TOKEN }}
+        run: |
+          cd viz_rill
+          rill deploy \
+            --org demo \
+            --project viz_rill \
+            --public \
+            --prod-branch cloud-implementation \
+            --api-token ${{ secrets.RILL_API_TOKEN }}
+
       - name: Notify on success
         if: success()
         run: |
           echo "✅ ETL pipeline completed successfully"
           echo "Data loaded to ClickHouse at ${{ secrets.CLICKHOUSE_HOST }}"
+          echo "📊 Dashboards deployed to Rill Cloud: https://ui.rilldata.com/demo/viz_rill/"
