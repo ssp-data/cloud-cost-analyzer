@@ -1,0 +1,43 @@
+# GCP Labels Canvas (auto-generated)
+
+type: canvas
+display_name: "GCP Labels Analysis"
+
+defaults:
+  time_range: P30D
+  comparison_mode: time
+
+rows:
+  - items:
+      - leaderboard:
+          dimensions: [project__id]
+          measures: [total_cost]
+          num_rows: 15
+          metrics_view: gcp_cost_metrics
+          title: "project__id"
+        width: 12
+    height: 300px
+  - items:
+      - leaderboard:
+          dimensions: [project__number]
+          measures: [total_cost]
+          num_rows: 15
+          metrics_view: gcp_cost_metrics
+          title: "project__number"
+        width: 12
+    height: 300px
+  - items:
+      - leaderboard:
+          dimensions: [project__name]
+          measures: [total_cost]
+          num_rows: 15
+          metrics_view: gcp_cost_metrics
+          title: "project__name"
+        width: 12
+    height: 300px
+
+time_ranges: [P7D, P30D, P3M, P6M, P12M]
+filters:
+  enable: true
+
+theme: theme
