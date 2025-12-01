@@ -4,4 +4,4 @@ display_name: Cloud Cost Analytics
 description: Multi-cloud cost analytics combining AWS, GCP costs and Stripe revenue. Analyze costs by provider, service, region, and time to optimize cloud spending and understand margins.
 
 #change to duckdb for local rill or to clickhouse to connect to clickhouse 
-olap_connector: duckdb
+olap_connector: clickhouse
