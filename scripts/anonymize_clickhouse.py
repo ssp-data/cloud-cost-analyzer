@@ -20,10 +20,7 @@ def get_clickhouse_client():
         host = dlt.secrets.get('destination.clickhouse.credentials.host')
         username = dlt.secrets.get('destination.clickhouse.credentials.username')
         password = dlt.secrets.get('destination.clickhouse.credentials.password')
-        # did not work: port = dlt.secrets.get('destination.clickhouse.credentials.port', 9440) # 8443, locally and 9440 cloud
-        # 1. Bypass dlt validation conflict
-        port_raw = dlt.secrets.get('destination.clickhouse.credentials.port')
-        port = int(port_raw)
+        port = 8443
 
         client = clickhouse_connect.get_client(
             host=host,
