@@ -38,15 +38,20 @@ jobs:
       - name: Create dlt secrets
         run: |
           mkdir -p .dlt
-          cat > .dlt/secrets.toml << EOF
-          # ClickHouse destination credentials
+          # Create secrets file with proper TOML formatting (unquoted integers)
+          cat > .dlt/secrets.toml << 'EOFMARKER'
           [destination.clickhouse.credentials]
-          host = "${{ secrets.CLICKHOUSE_HOST }}"
+          host = "CLICKHOUSE_HOST_PLACEHOLDER"
           port = 8443
-          username = "${{ secrets.CLICKHOUSE_USERNAME }}"
-          password = "${{ secrets.CLICKHOUSE_PASSWORD }}"
+          username = "CLICKHOUSE_USERNAME_PLACEHOLDER"
+          password = "CLICKHOUSE_PASSWORD_PLACEHOLDER"
           secure = 1
-          EOF
+          EOFMARKER
+
+          # Replace placeholders with actual secret values
+          sed -i "s/CLICKHOUSE_HOST_PLACEHOLDER/${{ secrets.CLICKHOUSE_HOST }}/g" .dlt/secrets.toml
+          sed -i "s/CLICKHOUSE_USERNAME_PLACEHOLDER/${{ secrets.CLICKHOUSE_USERNAME }}/g" .dlt/secrets.toml
+          sed -i "s/CLICKHOUSE_PASSWORD_PLACEHOLDER/${{ secrets.CLICKHOUSE_PASSWORD }}/g" .dlt/secrets.toml
 
       - name: Clear ClickHouse tables (force mode)
         run: |
