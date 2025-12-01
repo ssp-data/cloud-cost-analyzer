@@ -123,6 +123,22 @@ def anonymize_stripe_revenue(client, multiplier_min=2.0, multiplier_max=8.0):
         except Exception as e:
             print(f"  ⚠ Skipped {col}: {e}")
 
+    # Note: 'id' is PRIMARY KEY and cannot be updated in ClickHouse
+    # The transaction IDs (txn_xxx, ch_xxx) are not personally identifiable
+    # They're Stripe's internal IDs and safe to keep for demo purposes
+
+    # Hash source IDs (payout/charge references)
+    try:
+        sql = f"""
+        ALTER TABLE {table}
+        UPDATE source = concat(substring(source, 1, 3), substring(MD5(source), 1, 20))
+        WHERE source IS NOT NULL
+        """
+        client.command(sql)
+        print(f"  ✓ Hashed source IDs")
+    except Exception as e:
+        print(f"  ⚠ Skipped source IDs: {e}")
+
 
 def spread_to_recent_dates(client, table, days_to_spread=30):
     """
