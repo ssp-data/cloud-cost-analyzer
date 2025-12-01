@@ -1,0 +1,8 @@
+# Connector YAML
+# Reference documentation: https://docs.rilldata.com/reference/project-files/connectors
+  
+type: connector
+mode: readwrite
+
+driver: clickhouse
+dsn: "{{ .env.connector.clickhouse.dsn }}"

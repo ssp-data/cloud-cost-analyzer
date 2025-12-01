@@ -17,7 +17,9 @@
       "Bash(ls:*)",
       "WebFetch(domain:dlthub.com)",
       "WebFetch(domain:clickhouse.com)",
-      "Bash(bash -c \"cd viz_rill && duckdb -c \"\"\n-- This is what the gcp_costs model should produce\nSELECT\n  CAST(usage_start_time AS DATE) AS date,\n  service__description AS service_name,\n  sku__description AS sku_description,\n  location__location AS region,\n  location__country AS country,\n  project__id AS project_id,\n  project__name AS project_name,\n  billing_account_id,\n  cost,\n  currency,\n  cost_type,\n  usage__amount AS usage_amount,\n  usage__unit AS usage_unit,\n  transaction_type\nFROM read_parquet(''data/gcp_costs/bigquery_billing_table/*.parquet'')\nWHERE cost IS NOT NULL\nORDER BY cost DESC\nLIMIT 10;\n\"\"\")"
+      "Bash(bash -c \"cd viz_rill && duckdb -c \"\"\n-- This is what the gcp_costs model should produce\nSELECT\n  CAST(usage_start_time AS DATE) AS date,\n  service__description AS service_name,\n  sku__description AS sku_description,\n  location__location AS region,\n  location__country AS country,\n  project__id AS project_id,\n  project__name AS project_name,\n  billing_account_id,\n  cost,\n  currency,\n  cost_type,\n  usage__amount AS usage_amount,\n  usage__unit AS usage_unit,\n  transaction_type\nFROM read_parquet(''data/gcp_costs/bigquery_billing_table/*.parquet'')\nWHERE cost IS NOT NULL\nORDER BY cost DESC\nLIMIT 10;\n\"\"\")",
+      "Bash(git checkout:*)",
+      "Bash(timeout 12 rill start:*)"
     ],
     "deny": [],
     "ask": []

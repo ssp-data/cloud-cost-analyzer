@@ -1,4 +1,0 @@
-type: model
-sql: |
-  SELECT *
-  FROM read_parquet('data/normalized_gcp.parquet')

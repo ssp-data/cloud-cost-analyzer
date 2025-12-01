@@ -37,9 +37,16 @@ Once setup, we can run these seperate commands to run:
   # Generate dynamic dashboards (optional)
   make aws-dashboards
 
-  # Complete workflow
+  # Complete workflow (local)
   make run-all
+
+  # Cloud deployment with anonymized data
+  make run-all-cloud
 ```
+
+**Cloud deployment guides:**
+- [ANONYMIZATION.md](ANONYMIZATION.md) - Anonymize data for public dashboards
+- [viz_rill/CONNECTOR_SETUP.md](viz_rill/CONNECTOR_SETUP.md) - Connect Rill to ClickHouse
 
 
 ## Setup
@@ -214,6 +221,15 @@ If you change the AWS `table_name` from the default `cur_export_test_00001`, you
 - `viz_rill/.env` - Update `INPUT_DATA_DIR`
 
 Both files have comments showing exactly where to update the table name.
+
+#### Switching to and between ClickHouse (and local mode)
+This repo works on cloud with ClickHouse and Rill Cloud, or locally with Parquet files and Rill locally. The default mode is locally, but if you want to run it yourself on ClickHouse, you can switch to it with these settings:
+
+1. in rill.yaml change `olap_connector: clickhouse` to clickhouse
+3. set `RILL_CONNECTOR="clickhouse"` in .env in `viz_rill/.env` and add DNS a valid path for ClickHouse`connector.clickhouse.dsn="https://<HOST>.europe-west4.gcp.clickhouse.cloud:8443?username=default&password=<PASSWORD>&secure=true&skip_verify=true"`
+2. use ENV `DLT_DESTINATION=clickhouse`, but it will be set automatically inside Makefile
+
+After running the clickhouse pipeline with `make run-all-cloud`, it will load all data into clickhouse and serve rill from ClickHouse. More details in [ClickHouse Setup](CLICKHOUSE_SETUP.md).
 
 ### 4. Run the Pipeline
 

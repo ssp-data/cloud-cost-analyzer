@@ -6,7 +6,7 @@ version: 1
 type: metrics_view
 
 display_name: AWS Cost & Usage Analytics
-model: aws_cost_normalized
+model: aws_costs
 timeseries: date
 smallest_time_grain: "day"
 

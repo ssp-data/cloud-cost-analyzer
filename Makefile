@@ -71,6 +71,14 @@ clear-rill:
 	rm -rf viz_rill/tmp/
 	@echo "✅ Rill cache cleared"
 
+clear-clickhouse:
+	@echo "Clearing ClickHouse tables (interactive)..."
+	uv run python scripts/clear_clickhouse.py
+
+clear-clickhouse-force:
+	@echo "⚠️  Force clearing ClickHouse tables (non-interactive)..."
+	@echo "yes" | uv run python scripts/clear_clickhouse.py
+
 clear: dlt-clear clear-data clear-rill
 
 
@@ -186,3 +194,36 @@ init-clickhouse:
 ingest-normalized-clickhouse:
 	@echo "Ingesting normalized AWS & GCP data to ClickHouse..."
 	DLT_DESTINATION=clickhouse uv run python pipelines/ingest_normalized_pipeline.py
+
+## Cloud Deployment with Anonymization (for public demos)
+# Simple approach: Run normal ETL, then anonymize data directly in ClickHouse
+anonymize-clickhouse:
+	@echo ""
+	@echo "================================================================================"
+	@echo "Anonymizing ClickHouse Data for Public Demos"
+	@echo "================================================================================"
+	@echo ""
+	uv run python scripts/anonymize_clickhouse.py
+	@echo ""
+
+# Complete cloud pipeline with anonymization
+run-all-cloud: check-secrets run-etl-clickhouse anonymize-clickhouse serve
+	@echo ""
+	@echo "================================================================================"
+	@echo "✅ Cloud deployment complete with anonymized data!"
+	@echo "================================================================================"
+	@echo ""
+	@echo "Next steps:"
+	@echo "  1. Set RILL_CONNECTOR=clickhouse in viz_rill/.env"
+	@echo "  2. Run 'make serve' to view dashboards with ClickHouse data"
+	@echo "  3. Configure Rill Cloud to connect to your ClickHouse instance"
+	@echo ""
+	@echo "Useful commands:"
+	@echo "  make anonymize-clickhouse     # Re-anonymize data"
+	@echo "  make clear-clickhouse         # Drop all ClickHouse tables (interactive)"
+	@echo "  make clear-clickhouse-force   # Drop all ClickHouse tables (non-interactive)"
+	@echo ""
+	@echo "Customize anonymization with environment variables:"
+	@echo "  COST_MULTIPLIER_MIN=2.0 COST_MULTIPLIER_MAX=8.0 DUPLICATE_ROWS=3"
+	@echo ""
+	@echo "================================================================================"
