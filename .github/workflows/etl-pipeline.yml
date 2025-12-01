@@ -78,9 +78,10 @@ jobs:
         run: uv run python pipelines/stripe_pipeline.py
         continue-on-error: false
 
-      - name: Anonymize data for public dashboards
-        run: uv run python scripts/anonymize_clickhouse.py
-        continue-on-error: false
+        # TODO: Turn back on: turn off for testing
+      # - name: Anonymize data for public dashboards
+      #   run: uv run python scripts/anonymize_clickhouse.py
+      #   continue-on-error: false
 
       - name: Normalize AWS data (optional - for advanced dashboards)
         if: ${{ github.event.inputs.include_normalized == 'true' }}
