@@ -38,11 +38,11 @@ jobs:
       - name: Create dlt secrets
         run: |
           mkdir -p .dlt
-          cat > .dlt/secrets.toml << 'EOF'
+          cat > .dlt/secrets.toml << EOF
           # ClickHouse destination credentials
           [destination.clickhouse.credentials]
           host = "${{ secrets.CLICKHOUSE_HOST }}"
-          port = 9440
+          port = 8443
           username = "${{ secrets.CLICKHOUSE_USERNAME }}"
           password = "${{ secrets.CLICKHOUSE_PASSWORD }}"
           secure = 1
