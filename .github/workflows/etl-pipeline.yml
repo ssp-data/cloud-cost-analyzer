@@ -116,11 +116,17 @@ jobs:
             ~/.local/share/dlt/**/*.log
           retention-days: 7
 
-      - name: Install Rill CLI
-        run: curl https://rill.sh | sh -s -- -y
-
-      - name: Add Rill to PATH (for safety)
-        run: echo "$HOME/.rill" >> $GITHUB_PATH
+      - name: Install Rill CLI (Direct Download Alternative)
+        run: |
+          # 1. Download the latest Linux AMD64 binary
+          curl -sSL https://install.rilldata.com/latest/linux-amd64/rill -o rill
+          # 2. Make it executable
+          chmod +x rill
+          # 3. Move it to a directory that will be added to the PATH (e.g., ~/.local/bin)
+          mkdir -p ~/.local/bin
+          mv rill ~/.local/bin/rill
+          # 4. Add the local bin directory to the GITHUB_PATH
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Configure Rill Cloud environment
         run: |
