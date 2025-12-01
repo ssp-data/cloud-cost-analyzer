@@ -83,6 +83,25 @@ clear: dlt-clear clear-data clear-rill
 
 clear-all: clear clear-clickhouse
 
+## Connector switching helpers
+setup-connector-duckdb:
+	@sed -i 's/^olap_connector:.*$$/olap_connector: duckdb/' viz_rill/rill.yaml
+	@sed -i 's/^RILL_CONNECTOR=.*$$/RILL_CONNECTOR=""/' viz_rill/.env
+
+setup-connector-clickhouse:
+	@sed -i 's/^olap_connector:.*$$/olap_connector: clickhouse/' viz_rill/rill.yaml
+	@sed -i 's/^RILL_CONNECTOR=.*$$/RILL_CONNECTOR="clickhouse"/' viz_rill/.env
+
+set-connector-duckdb:
+	@echo "Setting Rill connector to DuckDB..."
+	@$(MAKE) setup-connector-duckdb
+	@echo "✅ Connector set to DuckDB (local parquet files)"
+
+set-connector-clickhouse:
+	@echo "Setting Rill connector to ClickHouse..."
+	@$(MAKE) setup-connector-clickhouse
+	@echo "✅ Connector set to ClickHouse (cloud database)"
+
 
 run-aws: check-secrets
 	uv run python pipelines/aws_pipeline.py
@@ -119,7 +138,18 @@ rill-deploy:
 serve:
 	rill start viz_rill
 
-demo: install-rill
+serve-duckdb: setup-connector-duckdb
+	@echo "Starting Rill with DuckDB connector..."
+	@rill start viz_rill || true
+	@$(MAKE) setup-connector-duckdb
+
+serve-clickhouse: setup-connector-clickhouse
+	@echo "Starting Rill with ClickHouse connector..."
+	@rill start viz_rill || true
+	@$(MAKE) setup-connector-clickhouse
+
+#FIX: setup-connector-duckdb is not working, as RIll cloud is syncing it back to clickhouse 
+demo: install-rill setup-connector-duckdb
 	@echo "================================================================================"
 	@echo "Running in DEMO mode with sample data"
 	@echo "================================================================================"
@@ -130,11 +160,14 @@ demo: install-rill
 	@echo "Copying demo data to viz_rill/data/..."
 	@cp -r viz_rill/data_demo/* viz_rill/data/
 	@echo "✅ Demo data copied successfully"
+	@echo "✅ Connector set to DuckDB (local parquet files)"
 	@echo ""
 	@echo "Starting Rill dashboards with demo data..."
 	@echo "NOTE: Run 'make clear' before running 'make run-all' to use real data"
 	@echo ""
-	rill start viz_rill
+	@$(MAKE) setup-connector-duckdb
+	@rill start viz_rill || true
+	@$(MAKE) setup-connector-duckdb
 
 ## AWS Advanced Analytics (CUR Wizard integration)
 aws-normalize:
@@ -174,7 +207,7 @@ gcp-dashboards: gcp-normalize gcp-generate-dashboards
 # 1. load data incrementally
 # 2. normalizes AWS & GCP cost reports and generates Rill dashboards
 # 3. starts Rill BI and opens in browser
-run-all: install run-etl aws-dashboards gcp-dashboards serve
+run-all: install run-etl aws-dashboards gcp-dashboards serve-duckdb
 
 
 
@@ -222,7 +255,7 @@ anonymize-clickhouse:
 # Complete cloud pipeline with anonymization
 # Note: Dynamic dashboard generation (aws-dashboards/gcp-dashboards) requires local parquet files,
 # so it's excluded from cloud mode. Static dashboards work with ClickHouse via models.
-run-all-cloud: check-secrets run-etl-clickhouse anonymize-clickhouse serve
+run-all-cloud: check-secrets run-etl-clickhouse anonymize-clickhouse serve-clickhouse
 	@echo ""
 	@echo "================================================================================"
 	@echo "✅ Cloud deployment complete with anonymized data!"
