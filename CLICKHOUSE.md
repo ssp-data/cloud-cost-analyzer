@@ -68,7 +68,7 @@ make anonymize-clickhouse
 # 5. Configure Rill to use ClickHouse
 cd viz_rill
 echo 'RILL_CONNECTOR=clickhouse' >> .env
-echo 'connector.clickhouse.dsn=clickhouse://user:pass@host:8443/default?secure=true' >> .env
+echo 'CONNECTOR_CLICKHOUSE_DSN=clickhouse://user:pass@host:8443/default?secure=true' >> .env
 
 # 6. View dashboards
 cd .. && make serve
@@ -182,7 +182,7 @@ make run-etl-clickhouse
 cd viz_rill
 cat > .env << 'EOF'
 RILL_CONNECTOR=clickhouse
-connector.clickhouse.dsn=clickhouse://user:pass@host:8443/default?secure=true
+CONNECTOR_CLICKHOUSE_DSN=clickhouse://user:pass@host:8443/default?secure=true
 EOF
 
 # 3. View dashboards

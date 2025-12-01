@@ -232,7 +232,7 @@ rill deploy \
 --org demo \
 --path viz_rill \
 --public \
---prod-branch cloud-implementation \
+--prod-branch main \
 ```
 
 ### Rill Cloud Project

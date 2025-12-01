@@ -5,4 +5,4 @@ type: connector
 mode: readwrite
 
 driver: clickhouse
-dsn: "{{ .env.connector.clickhouse.dsn }}"
+dsn: "{{ .env.CONNECTOR_CLICKHOUSE_DSN }}"
