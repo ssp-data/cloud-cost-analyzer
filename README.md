@@ -403,6 +403,47 @@ make serve  # Opens Rill at http://localhost:9009
 
 See `viz_rill/README.md` for dashboard details and integration information.
 
+## Data Normalization (Optional)
+
+**TL;DR: Normalization is optional and only needed for dynamic dashboard generation.**
+
+### What Normalization Does
+
+The normalization scripts (`normalize.py`, `normalize_gcp.py`) flatten nested data structures (AWS resource_tags, GCP labels) and feed them to the dashboard generator from [aws-cur-wizard](https://github.com/Twing-Data/aws-cur-wizard).
+
+### Do You Need It?
+
+It works without also. The core dashboards work without normalization:
+- ✅ Static dashboards (`viz_rill/dashboards/*.yaml`) query raw data via models
+- ✅ Models use `SELECT *` to read all columns from raw parquet/ClickHouse
+- ✅ Everything works for both local and cloud deployment
+
+But it provides useful dashboards (alredy pre commited in this repo), but if you have different data, i'd suggest to run it. Normalization provides:
+- Auto-generated dimension-specific canvases (e.g., per-tag breakdowns)
+- Dynamic explorers based on discovered labels/tags
+- CUR Wizard's intelligent chart type selection
+
+### How to Generate Dynamic Dashboards
+
+```bash
+# Generate AWS canvases (optional)
+make aws-dashboards  # Normalizes + generates canvases/explores/
+
+# Generate GCP canvases (optional)
+make gcp-dashboards  # Normalizes + generates canvases/explores/
+
+# View all dashboards (static + generated)
+make serve
+```
+
+**Generated files** (in `.gitignore` but can be committed):
+- `viz_rill/canvases/*.yaml` - Dimension-specific breakdowns
+- `viz_rill/explores/*.yaml` - Auto-generated explorers
+- `viz_rill/data/normalized_aws.parquet` - Flattened AWS data
+- `viz_rill/data/normalized_gcp.parquet` - Flattened GCP data
+
+See [CLICKHOUSE.md](CLICKHOUSE.md#advanced-normalization-optional) for more details.
+
 ## Complete Workflow
 
 ```bash

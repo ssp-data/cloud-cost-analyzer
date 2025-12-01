@@ -81,6 +81,8 @@ clear-clickhouse-force:
 
 clear: dlt-clear clear-data clear-rill
 
+clear-all: clear clear-clickhouse
+
 
 run-aws: check-secrets
 	uv run python pipelines/aws_pipeline.py
@@ -166,7 +168,7 @@ gcp-dashboards: gcp-normalize gcp-generate-dashboards
 # 1. load data incrementally
 # 2. normalizes AWS & GCP cost reports and generates Rill dashboards
 # 3. starts Rill BI and opens in browser
-run-all: install run-etl aws-normalize gcp-normalize serve
+run-all: install run-etl aws-dashboards gcp-dashboards serve
 
 
 
@@ -207,7 +209,7 @@ anonymize-clickhouse:
 	@echo ""
 
 # Complete cloud pipeline with anonymization
-run-all-cloud: check-secrets run-etl-clickhouse anonymize-clickhouse serve
+run-all-cloud: check-secrets run-etl-clickhouse aws-dashboards gcp-dashboards anonymize-clickhouse serve
 	@echo ""
 	@echo "================================================================================"
 	@echo "✅ Cloud deployment complete with anonymized data!"
