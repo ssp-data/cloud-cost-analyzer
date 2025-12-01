@@ -417,13 +417,16 @@ The normalization scripts (`normalize.py`, `normalize_gcp.py`) are now **optiona
 
 ### If you still want normalization
 
-**For local mode:**
+**Important:** Dynamic dashboard generation (`make aws-dashboards` / `make gcp-dashboards`) only works in **local mode** because it requires parquet files to analyze. ClickHouse mode doesn't create parquet files.
+
+**For local mode only:**
 ```bash
-make aws-normalize gcp-normalize
-# Creates normalized parquet files in viz_rill/data/
+# These commands work ONLY with local parquet files
+make aws-dashboards   # Requires: viz_rill/data/aws_costs/*.parquet
+make gcp-dashboards   # Requires: viz_rill/data/gcp_costs/*.parquet
 ```
 
-**For ClickHouse (recommended approach):**
+**For ClickHouse (alternative approach):**
 ```sql
 -- Create materialized view instead of Python normalization
 CREATE MATERIALIZED VIEW aws_costs_normalized AS

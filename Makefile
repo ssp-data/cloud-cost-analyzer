@@ -209,7 +209,9 @@ anonymize-clickhouse:
 	@echo ""
 
 # Complete cloud pipeline with anonymization
-run-all-cloud: check-secrets run-etl-clickhouse aws-dashboards gcp-dashboards anonymize-clickhouse serve
+# Note: Dynamic dashboard generation (aws-dashboards/gcp-dashboards) requires local parquet files,
+# so it's excluded from cloud mode. Static dashboards work with ClickHouse via models.
+run-all-cloud: check-secrets run-etl-clickhouse anonymize-clickhouse serve
 	@echo ""
 	@echo "================================================================================"
 	@echo "✅ Cloud deployment complete with anonymized data!"

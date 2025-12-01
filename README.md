@@ -425,11 +425,13 @@ But it provides useful dashboards (alredy pre commited in this repo), but if you
 
 ### How to Generate Dynamic Dashboards
 
+**Important:** This only works in **local mode** (parquet files). ClickHouse mode doesn't create parquet files, so dynamic dashboard generation is unavailable.
+
 ```bash
-# Generate AWS canvases (optional)
+# Local mode only - Generate AWS canvases (optional)
 make aws-dashboards  # Normalizes + generates canvases/explores/
 
-# Generate GCP canvases (optional)
+# Local mode only - Generate GCP canvases (optional)
 make gcp-dashboards  # Normalizes + generates canvases/explores/
 
 # View all dashboards (static + generated)
@@ -441,6 +443,18 @@ make serve
 - `viz_rill/explores/*.yaml` - Auto-generated explorers
 - `viz_rill/data/normalized_aws.parquet` - Flattened AWS data
 - `viz_rill/data/normalized_gcp.parquet` - Flattened GCP data
+
+### Feature Comparison: Local vs Cloud Mode
+
+| Feature | Local Mode (Parquet) | Cloud Mode (ClickHouse) |
+|---------|---------------------|------------------------|
+| Static dashboards | ✅ Always work | ✅ Always work |
+| Dynamic dashboard generation | ✅ `make aws-dashboards` | ❌ Not available* |
+| Data storage | Parquet files | ClickHouse Cloud |
+| Normalization | Optional | Not needed |
+| Best for | Development, dynamic canvases | Production, GitHub Actions |
+
+*ClickHouse doesn't create parquet files, so the dashboard generator can't analyze data. Static dashboards provide full functionality.
 
 See [CLICKHOUSE.md](CLICKHOUSE.md#advanced-normalization-optional) for more details.
 
