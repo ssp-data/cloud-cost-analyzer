@@ -116,8 +116,8 @@ jobs:
             ~/.local/share/dlt/**/*.log
           retention-days: 7
 
-      - name: Install Rill CLI
-        run: curl https://rill.sh | sh
+      - name: Install Rill CLI (Non-interactive)
+        run: echo '2' | curl https://rill.sh | sh
 
       - name: Configure Rill Cloud environment
         run: |
