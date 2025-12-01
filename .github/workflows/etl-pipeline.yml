@@ -119,6 +119,9 @@ jobs:
       - name: Install Rill CLI (Non-interactive)
         run: echo '2' | curl https://rill.sh | sh
 
+      - name: Add Rill to PATH (for safety)
+        run: echo "$HOME/.rill" >> $GITHUB_PATH
+
       - name: Configure Rill Cloud environment
         run: |
           cd viz_rill
