@@ -1,6 +1,6 @@
 type: canvas
 display_name: Dynamic Tag Insights
-defaults: { time_range: P12M }
+defaults: { time_range: P30D }
 
 rows:
 

@@ -10,7 +10,7 @@ measures: '*'
 
 defaults:
   comparison_mode: time
-  time_range: P4W
+  time_range: P30D
   dimensions:
     - service__description
     - project__id

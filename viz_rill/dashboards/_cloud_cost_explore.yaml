@@ -13,7 +13,7 @@ measures: '*'
 
 defaults:
   comparison_mode: time
-  time_range: P4W  # Last 4 weeks
+  time_range: P30D
   dimensions:
     - cloud_provider
   measures:

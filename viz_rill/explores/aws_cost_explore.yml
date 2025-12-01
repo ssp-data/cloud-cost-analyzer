@@ -4,3 +4,6 @@ metrics_view: aws_cost_metrics
 
 dimensions: "*"
 measures: "*"
+
+defaults:
+  time_range: P30D
