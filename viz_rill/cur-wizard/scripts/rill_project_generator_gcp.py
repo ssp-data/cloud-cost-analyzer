@@ -85,43 +85,50 @@ def generate_gcp_rill_project(
         provider="GCP",
     )
 
-    # Generate metrics
-    (out_dir / "metrics" / "gcp_cost_metrics.yaml").write_text(
-        _render("metrics_template_gcp.yaml.j2", **shared)
-    )
-    print("✓ metrics written → metrics/gcp_cost_metrics.yaml")
+    # NOTE: Metrics, sources, dashboards are hand-crafted static files that work with both
+    # local (parquet) and cloud (ClickHouse) modes. We skip generating them to avoid overwrites.
+    # Only generate dimension-specific canvases below.
 
-    # Generate source
-    (out_dir / "sources" / "gcp_cost_source.yaml").write_text(
-        _render(
-            "source_template_gcp.yaml.j2",
-            parquet_path=str(parquet_path),
-        )
-    )
-    print("✓ source written → sources/gcp_cost_source.yaml")
+    # # Generate metrics (DISABLED - use static file)
+    # (out_dir / "metrics" / "gcp_cost_metrics.yaml").write_text(
+    #     _render("metrics_template_gcp.yaml.j2", **shared)
+    # )
+    # print("✓ metrics written → metrics/gcp_cost_metrics.yaml")
 
-    # Generate explore
-    (out_dir / "explores" / "gcp_cost_explore.yaml").write_text(
-        _render("explore_template_gcp.yaml.j2", metrics_view="gcp_cost_metrics")
-    )
-    print("✓ explore written → explores/gcp_cost_explore.yaml")
+    # # Generate source (DISABLED - use static models)
+    # (out_dir / "sources" / "gcp_cost_source.yaml").write_text(
+    #     _render(
+    #             "source_template_gcp.yaml.j2",
+    #         parquet_path=str(parquet_path),
+    #     )
+    # )
+    # print("✓ source written → sources/gcp_cost_source.yaml")
 
-    # Generate overview dashboard
-    overview_yaml = _render(
-        "overview_dashboard_template_gcp.yaml.j2",
-        metrics_view="gcp_cost_metrics",
-        **shared,
-    )
-    (out_dir / "dashboards" / "gcp_overview.yaml").write_text(overview_yaml)
-    print("✓ dashboard written → dashboards/gcp_overview.yaml")
+    # # Generate explore (DISABLED - use static file)
+    # (out_dir / "explores" / "gcp_cost_explore.yaml").write_text(
+    #     _render("explore_template_gcp.yaml.j2", metrics_view="gcp_cost_metrics")
+    # )
+    # print("✓ explore written → explores/gcp_cost_explore.yaml")
 
-    # Generate product insights dashboard (static)
-    product_insights_yaml = _render(
-        "product_insights_gcp.yaml.j2",
-        metrics_view="gcp_cost_metrics",
-    )
-    (out_dir / "dashboards" / "gcp_product_insights.yaml").write_text(product_insights_yaml)
-    print("✓ dashboard written → dashboards/gcp_product_insights.yaml")
+    # # Generate overview dashboard (DISABLED - use static file)
+    # overview_yaml = _render(
+    #     "overview_dashboard_template_gcp.yaml.j2",
+    #     metrics_view="gcp_cost_metrics",
+    #     **shared,
+    # )
+    # (out_dir / "dashboards" / "gcp_overview.yaml").write_text(overview_yaml)
+    # print("✓ dashboard written → dashboards/gcp_overview.yaml")
+
+    # # Generate product insights dashboard (DISABLED - use static file)
+    # product_insights_yaml = _render(
+    #     "product_insights_gcp.yaml.j2",
+    #     metrics_view="gcp_cost_metrics",
+    # )
+    # (out_dir / "dashboards" / "gcp_product_insights.yaml").write_text(product_insights_yaml)
+    # print("✓ dashboard written → dashboards/gcp_product_insights.yaml")
+
+    print("ℹ️  Skipping metrics/sources/dashboards generation (using static files)")
+    print("   Only generating dimension-specific canvases below...")
 
     # Generate label-specific canvases
     for prefix in dim_prefixes:

@@ -131,27 +131,38 @@ def generate_rill_project(
         **(extra_context or {}),
     )
 
-    (out_dir / "metrics" / "aws_cost_metrics.yml").write_text(
-        _render("metrics_template.yml.j2", **shared)
-    )
-    (out_dir / "sources" / "aws_cost_source.yml").write_text(
-        _render(
-            "source_template.yml.j2",
-            parquet_path=str(parquet_path),
-            env={"DATA_DIR": str(parquet_path.parent)},
-        )
-    )
-    (out_dir / "explores" / "aws_cost_explore.yml").write_text(
-        _render("explore_template.yml.j2", metrics_view="aws_cost_metrics")
-    )
+    # NOTE: Metrics, sources, explores are hand-crafted static files that work with both
+    # local (parquet) and cloud (ClickHouse) modes. We skip generating them to avoid overwrites.
+    # Only generate dimension-specific canvases below.
 
-    overview_canvas_yaml = _render(
-        "overview_canvas_template.yml.j2",
-        metrics_view="aws_cost_metrics",
-        **shared,
-    )
-    (out_dir / "canvases" / "aws_cost_overview_canvas.yml").write_text(overview_canvas_yaml)
-    print("✓ canvas written → canvases/aws_cost_overview_canvas.yml")
+    # # Generate metrics (DISABLED - use static file)
+    # (out_dir / "metrics" / "aws_cost_metrics.yml").write_text(
+    #     _render("metrics_template.yml.j2", **shared)
+    # )
+    # # Generate source (DISABLED - use static models)
+    # (out_dir / "sources" / "aws_cost_source.yml").write_text(
+    #     _render(
+    #         "source_template.yml.j2",
+    #         parquet_path=str(parquet_path),
+    #         env={"DATA_DIR": str(parquet_path.parent)},
+    #     )
+    # )
+    # # Generate explore (DISABLED - use static file)
+    # (out_dir / "explores" / "aws_cost_explore.yml").write_text(
+    #     _render("explore_template.yml.j2", metrics_view="aws_cost_metrics")
+    # )
+
+    # # Generate overview canvas (DISABLED - use static dashboard)
+    # overview_canvas_yaml = _render(
+    #     "overview_canvas_template.yml.j2",
+    #     metrics_view="aws_cost_metrics",
+    #     **shared,
+    # )
+    # (out_dir / "canvases" / "aws_cost_overview_canvas.yml").write_text(overview_canvas_yaml)
+    # print("✓ canvas written → canvases/aws_cost_overview_canvas.yml")
+
+    print("ℹ️  Skipping metrics/sources/explores generation (using static files)")
+    print("   Only generating dimension-specific canvases below...")
 
     for prefix in dim_prefixes:
         charts = select_dimension_charts(
