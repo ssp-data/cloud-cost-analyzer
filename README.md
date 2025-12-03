@@ -1,6 +1,17 @@
 # Cloud Cost Analyzer Project
 
-Multi-cloud cost analytics platform combining AWS Cost and Usage Reports (CUR), GCP billing data, and Stripe revenue metrics. Built with dlt for data ingestion, DuckDB for storage, and Rill for visualization.
+Multi-cloud cost analytics platform combining AWS Cost and Usage Reports (CUR), GCP billing data, and Stripe revenue metrics. Built with dlt for data ingestion, DuckDB/ClickHouse for storage, and Rill for visualization.
+
+> **NEW: Cloud-Ready Version**
+>
+> This version now supports **both local and cloud deployment**:
+> - **Local Mode**: Parquet files + DuckDB + local Rill (perfect for development)
+> - **Cloud Mode**: ClickHouse Cloud + Rill Cloud + GitHub Actions automation (production-ready)
+>
+> Switch between modes with a single command. The same codebase works everywhere!
+>
+> See [CLICKHOUSE.md](CLICKHOUSE.md) for cloud deployment guide
+> Looking for the original local-only version? Check out [branch `v1`](https://github.com/ssp-data/cloud-cost-analyzer/tree/v1)
 
 ![](img/tech-stack.png)
 
@@ -9,8 +20,11 @@ Multi-cloud cost analytics platform combining AWS Cost and Usage Reports (CUR), 
 
 - **Multi-Cloud Cost Tracking** - AWS, GCP, and future cloud providers
 - **Revenue Integration** - Stripe payment data for margin analysis
+- **Dual Deployment Modes** - Run locally with Parquet/DuckDB or in the cloud with ClickHouse/Rill Cloud
 - **Incremental Loading** - Efficient append-only data pipeline with dlt
 - **Advanced Analytics** - RI/SP utilization, unit economics, effective cost tracking (adapted from [aws-cur-wizard](https://github.com/Twing-Data/aws-cur-wizard))
+- **GitHub Actions Automation** - [Daily data updates](.github/workflows/etl-pipeline.yml) with automated ETL pipelines
+- **Data Anonymization** - Built-in anonymization for public dashboards (see [ANONYMIZATION.md](ANONYMIZATION.md))
 - **Dynamic Dashboards** - Powered by Rill visualizations
 
 ## Quick Start with Demo Data
@@ -29,24 +43,34 @@ Opens at http://localhost:9009 with sample data.
 
 ## How it works
 
-Once setup, we can run these seperate commands to run:
+### Two Deployment Modes
+
+This project supports both local development and cloud production:
+
+**Local Mode** (default):
 ```sh
-  # View static dashboards (always available)
-  make serve
+make run-all        # ETL → Parquet files → Local Rill dashboard
+make serve          # View dashboards at localhost:9009
+```
+Perfect for: Development, testing, small datasets
 
-  # Generate dynamic dashboards (optional)
-  make aws-dashboards
+**Cloud Mode** (production-ready):
+```sh
+make run-all-cloud  # ETL → ClickHouse Cloud → Anonymize → Rill Cloud/Local
+```
+Perfect for: Production, team collaboration, large datasets, public dashboards
 
-  # Complete workflow (local)
-  make run-all
-
-  # Cloud deployment with anonymized data
-  make run-all-cloud
+**Additional commands:**
+```sh
+make aws-dashboards  # Generate dynamic AWS dashboards (local mode only)
+make serve-clickhouse  # View dashboards connected to ClickHouse
 ```
 
-**Cloud deployment guides:**
-- [CLICKHOUSE.md](CLICKHOUSE.md) - Complete ClickHouse Cloud setup, deployment, and switching guide
-- [ANONYMIZATION.md](ANONYMIZATION.md) - Data anonymization for public dashboards
+### Deployment Guides
+
+- **[CLICKHOUSE.md](CLICKHOUSE.md)** - Complete ClickHouse Cloud setup, deployment, mode switching, and GitHub Actions automation
+- **[ANONYMIZATION.md](ANONYMIZATION.md)** - Data anonymization for public dashboards
+- **[CLAUDE.md](CLAUDE.md)** - Architecture details and development guide
 
 
 ## Setup
@@ -217,30 +241,43 @@ The `initial_start_date` parameter controls how far back to load historical data
 **Note about AWS table_name and Rill dashboards:**
 If you change the AWS `table_name` from the default `cur_export_test_00001`, you'll also need to update the parquet path in `viz_rill/models/aws_costs.sql` (file has comments showing where).
 
-#### Cloud Deployment (ClickHouse)
-This repo supports both local (default) and cloud deployment:
+#### Cloud Deployment with ClickHouse & Rill Cloud
 
-- **Local mode** (default): Parquet files + Rill local server
-- **Cloud mode**: ClickHouse Cloud + Rill Cloud or local Rill
+**New in this version**: Deploy to production with ClickHouse Cloud and automate with GitHub Actions!
 
-To deploy to ClickHouse Cloud, see [CLICKHOUSE.md](CLICKHOUSE.md) for complete setup instructions including:
-- ClickHouse Cloud account setup
-- Switching between local and cloud modes
-- Data anonymization for public dashboards
-- GitHub Actions automation
-- Troubleshooting
+**Quick Cloud Setup:**
 
-Short setup version:
+1. **Create ClickHouse Cloud service** ([sign up free](https://clickhouse.cloud))
 
-1. In rill.yaml change `olap_connector: clickhouse` to clickhouse 
-2. set `RILL_CONNECTOR="clickhouse"` in .env in `viz_rill/.env` and add DNS a valid path for ClickHouse`CONNECTOR_CLICKHOUSE_DSN="https://<HOST>.europe-west4.gcp.clickhouse.cloud:8443?username=default&password=<PASSWORD>&secure=true&skip_verify=true"`
-3. use ENV `DLT_DESTINATION=clickhouse`, but it will be set automatically inside Makefile
-1. in rill.yaml change `olap_connector: clickhouse` to clickhouse
+2. **Add credentials to `.dlt/secrets.toml`:**
+   ```toml
+   [destination.clickhouse.credentials]
+   host = "xxxxx.europe-west4.gcp.clickhouse.cloud"
+   port = 8443
+   username = "default"
+   password = "your-password"
+   secure = 1
+   ```
 
+3. **Configure Rill for ClickHouse** in `viz_rill/.env`:
+   ```bash
+   RILL_CONNECTOR="clickhouse"
+   CONNECTOR_CLICKHOUSE_DSN="clickhouse://default:password@host:8443/default?secure=true"
+   ```
 
-After running the clickhouse pipeline with `make run-all-cloud`, it will load all data into clickhouse and serve rill from ClickHouse. 
+4. **Run cloud pipeline:**
+   ```bash
+   make init-clickhouse      # Initialize database (one-time)
+   make run-all-cloud        # ETL + anonymize + serve
+   ```
 
-Long version with details in [ClickHouse Setup](CLICKHOUSE.md). 
+**What you get:**
+- Data stored in ClickHouse Cloud (scalable, fast)
+- [Automated daily updates via GitHub Actions](.github/workflows/etl-pipeline.yml) (runs at 2 AM UTC)
+- Optional data anonymization for public dashboards
+- Works with both Rill Cloud and local Rill
+
+**Complete guide**: See [CLICKHOUSE.md](CLICKHOUSE.md) for detailed setup, GitHub Actions configuration, mode switching, and troubleshooting. 
 
 ### 4. Run the Pipeline
 
@@ -252,6 +289,7 @@ make serve    # Opens Rill dashboards
 
 ## How the Data Pipeline Works
 
+This pipeline supports both **local mode** (Parquet + DuckDB) and **cloud mode** (ClickHouse Cloud). The architecture remains the same, only the storage layer changes.
 
 ## The Data Flow
 ```mermaid
@@ -280,13 +318,12 @@ subgraph "2: NORMALIZE (Python + DuckDB)"
     P3 --> R1
 end
 
-subgraph "3: RAW STORAGE (Parquet)"
-    R1[data/aws_costs/<br/>cur_export_test_00001/<br/>*.parquet]
-    R2[data/gcp_costs/<br/>normalized.parquet]
-    R3[data/stripe_costs/<br/>balance_transaction.parquet]
+subgraph "3: STORAGE (Dual Mode)"
+    R1[LOCAL: Parquet files<br/>or<br/>CLOUD: ClickHouse tables]
+    R2[Switch with DLT_DESTINATION env var]
 
     N1 -.-> R1
-    N2 --> R2
+    N2 --> R1
     P1 --> R1
 end
 
@@ -297,8 +334,8 @@ subgraph "4: MODEL (SQL - Star Schema)"
     M4[unified_cost_model.sql<br/>🌟 UNION ALL + Currency Conversion]
 
     R1 --> M1
-    R2 --> M2
-    R3 --> M3
+    R1 --> M2
+    R1 --> M3
 
     M1 --> M4
     M2 --> M4
@@ -328,6 +365,8 @@ style P2 fill:#4A90E2,stroke:#2E5C8A,color:#fff
 style P3 fill:#4A90E2,stroke:#2E5C8A,color:#fff
 style N1 fill:#9B59B6,stroke:#7D3C98,color:#fff
 style N2 fill:#9B59B6,stroke:#7D3C98,color:#fff
+style R1 fill:#FF6B6B,stroke:#C92A2A,color:#fff
+style R2 fill:#FF6B6B,stroke:#C92A2A,color:#fff
 style M4 fill:#E74C3C,stroke:#C0392B,color:#fff
 style MV3 fill:#27AE60,stroke:#1E8449,color:#fff
 style D3 fill:#F39C12,stroke:#D68910,color:#fff
@@ -344,22 +383,38 @@ style D3 fill:#F39C12,stroke:#D68910,color:#fff
 
 ### Incremental Loading
 
-Uses `write_disposition="append"` - cost data is append-only (no updates/merges needed).
+Uses `write_disposition="append"` - cost data is append-only (no updates/merges needed). AWS uses `merge` for hard deduplication.
 
-### Data Flow
+### Data Flow by Mode
 
+**Local Mode:**
 ```
-Cloud Providers          dlt Pipelines              Storage                 Visualization
-AWS S3 (CUR)      →→     aws_pipeline.py      →→    Parquet files    →→    Rill Dashboards
-GCP BigQuery      →→     google_bq_*.py       →→    viz_rill/data/   →→    localhost:9009
-Stripe API        →→     stripe_pipeline.py   →→                     →→
+Cloud Providers    dlt Pipelines          Storage              Visualization
+AWS S3 (CUR)   →   aws_pipeline.py   →   Parquet files    →   Rill (DuckDB)
+GCP BigQuery   →   google_bq_*.py    →   viz_rill/data/   →   localhost:9009
+Stripe API     →   stripe_pipeline.py →                   →
 ```
+
+**Cloud Mode:**
+```
+Cloud Providers    dlt Pipelines          Storage               Visualization
+AWS S3 (CUR)   →   aws_pipeline.py   →   ClickHouse Cloud  →   Rill Cloud/Local
+GCP BigQuery   →   google_bq_*.py    →   (via dlt)         →   (connects to CH)
+Stripe API     →   stripe_pipeline.py →                    →
+                        ↓
+                  GitHub Actions (automated daily at 2 AM UTC)
+```
+See [workflow configuration](.github/workflows/etl-pipeline.yml) for details.
 
 ### Output
 
-Data is stored in both formats:
+**Local Mode:**
+- **Parquet files**: `viz_rill/data/` (primary storage, used by Rill via DuckDB)
 - **DuckDB**: `cloud_cost_analytics.duckdb` (legacy, optional)
-- **Parquet**: `viz_rill/data/` (used by Rill dashboards)
+
+**Cloud Mode:**
+- **ClickHouse tables**: Scalable cloud database
+- **Automated updates**: Via [GitHub Actions](.github/workflows/etl-pipeline.yml) (daily at 2 AM UTC)
 
 ## Troubleshooting
 
@@ -414,9 +469,9 @@ The normalization scripts (`normalize.py`, `normalize_gcp.py`) flatten nested da
 ### Do You Need It?
 
 It works without also. The core dashboards work without normalization:
-- ✅ Static dashboards (`viz_rill/dashboards/*.yaml`) query raw data via models
-- ✅ Models use `SELECT *` to read all columns from raw parquet/ClickHouse
-- ✅ Everything works for both local and cloud deployment
+- Static dashboards (`viz_rill/dashboards/*.yaml`) query raw data via models
+- Models use `SELECT *` to read all columns from raw parquet/ClickHouse
+- Everything works for both local and cloud deployment
 
 But it provides useful dashboards (alredy pre commited in this repo), but if you have different data, i'd suggest to run it. Normalization provides:
 - Auto-generated dimension-specific canvases (e.g., per-tag breakdowns)
@@ -460,21 +515,54 @@ See [CLICKHOUSE.md](CLICKHOUSE.md#advanced-normalization-optional) for more deta
 
 ## Complete Workflow
 
+### Local Development Workflow
+
 ```bash
-# Full workflow: ETL + dashboards
+# Full local workflow: ETL + dashboards
 make run-all
 
 # Or step-by-step:
-make run-etl         # 1. Load AWS/GCP/Stripe data
+make run-etl         # 1. Load AWS/GCP/Stripe data → Parquet files
 make aws-dashboards  # 2. (Optional) Generate dynamic dashboards
-make serve           # 3. View in browser
+make serve           # 3. View in browser at localhost:9009
+```
+
+### Cloud Production Workflow
+
+```bash
+# Full cloud workflow: ETL + anonymize + serve
+make run-all-cloud
+
+# Or step-by-step:
+make init-clickhouse      # 1. Initialize ClickHouse (one-time)
+make run-etl-clickhouse   # 2. Load data → ClickHouse Cloud
+make anonymize-clickhouse # 3. (Optional) Anonymize for public dashboards
+make serve-clickhouse     # 4. View dashboards (local Rill → ClickHouse)
+```
+
+**Switching modes:**
+```bash
+make set-connector-duckdb      # Switch to local Parquet/DuckDB
+make set-connector-clickhouse  # Switch to ClickHouse Cloud
 ```
 
 ## Documentation
 
-- [CLICKHOUSE.md](CLICKHOUSE.md) - ClickHouse Cloud deployment, mode switching, and troubleshooting
-- [ANONYMIZATION.md](ANONYMIZATION.md) - Data anonymization for public dashboards
-- `viz_rill/README.md` - Dashboard structure and how the visualization layer works
-- `ATTRIBUTION.md` - Third-party components (aws-cur-wizard) used in this project
+### Cloud Deployment
+- **[CLICKHOUSE.md](CLICKHOUSE.md)** - ClickHouse Cloud setup, GitHub Actions automation, mode switching, and troubleshooting
+- **[ANONYMIZATION.md](ANONYMIZATION.md)** - Data anonymization for public dashboards
+- **GitHub Actions Workflows**:
+  - [Daily ETL Pipeline](.github/workflows/etl-pipeline.yml) - Automated data ingestion (runs at 2 AM UTC)
+  - [Clear ClickHouse Data](.github/workflows/clear-clickhouse.yml) - Manual workflow to drop all tables
+
+### Development & Architecture
+- **[CLAUDE.md](CLAUDE.md)** - Architecture details, key design patterns, and development guide
+- **[viz_rill/README.md](viz_rill/README.md)** - Dashboard structure and visualization layer
+- **[ATTRIBUTION.md](ATTRIBUTION.md)** - Third-party components (aws-cur-wizard)
+
+### Related Resources
+- **Blog Post**: [Multi-Cloud Cost Analytics: From Cost-Export to Parquet to Rill](https://www.ssp.sh/blog/cost-analyzer-aws-gcp/) - Detailed write-up of this project
+- **Blog Post Part 2**: [Multi-Cloud Cost Analytics with dlt, ClickHouse & Rill](https://www.ssp.sh/posts/) - Detailed write-up of this project
+- **Original Local Version**: [Branch `v1`](https://github.com/ssp-data/cloud-cost-analyzer/tree/v1) - Pre-ClickHouse version
 
 
