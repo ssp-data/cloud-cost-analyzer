@@ -8,10 +8,7 @@ Multi-cloud cost analytics platform combining AWS Cost and Usage Reports (CUR), 
 > - **Local Mode**: Parquet files + DuckDB + local Rill (perfect for development)
 > - **Cloud Mode**: ClickHouse Cloud + Rill Cloud + GitHub Actions automation (production-ready)
 >
-> Switch between modes with a single command. The same codebase works everywhere!
->
-> See [CLICKHOUSE.md](CLICKHOUSE.md) for cloud deployment guide
-> Looking for the original local-only version? Check out [branch `v1`](https://github.com/ssp-data/cloud-cost-analyzer/tree/v1)
+> Switch between modes with a single command. The same codebase works everywhere! Looking for the original local-only version? Check out [branch `v1`](https://github.com/ssp-data/cloud-cost-analyzer/tree/v1)
 
 ![](img/tech-stack.png)
 
