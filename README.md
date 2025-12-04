@@ -75,7 +75,7 @@ We need to get the Cost reports and the credentials properly setup.
 
 First we clone the project, isntall dependencies, then we setup the cost reports for each cloud provider and at the end, we need to set `.dlt/secrets.toml` and `.dlt/config.toml` to match your data. 
 
-Below step by step how to create a cost report and extract the keys. Also check [related blog post](http://www.ssp.sh/blog/cost-analyzer-aws-gcp/) for more details.
+Below step by step how to create a cost report and extract the keys. Also check related blog posts: [local first](http://www.ssp.sh/blog/cost-analyzer-aws-gcp/) and [cloud-ready](https://www.ssp.sh/blog/finops-dlt-clickhouse-rill/) for more details.
 
 
 ### 1. Install Dependencies
@@ -559,7 +559,7 @@ make set-connector-clickhouse  # Switch to ClickHouse Cloud
 
 ### Related Resources
 - **Blog Post**: [Multi-Cloud Cost Analytics: From Cost-Export to Parquet to Rill](https://www.ssp.sh/blog/cost-analyzer-aws-gcp/) - Detailed write-up of this project
-- **Blog Post Part 2**: [Multi-Cloud Cost Analytics with dlt, ClickHouse & Rill](https://www.ssp.sh/posts/) - Detailed write-up of this project
+- **Blog Post Part 2**: [Multi-Cloud Cost Analytics with dlt, ClickHouse & Rill](https://www.ssp.sh/blog/finops-dlt-clickhouse-rill/) - Detailed write-up of this project
 - **Original Local Version**: [Branch `v1`](https://github.com/ssp-data/cloud-cost-analyzer/tree/v1) - Pre-ClickHouse version
 
 
