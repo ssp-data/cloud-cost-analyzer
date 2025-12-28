@@ -10,6 +10,9 @@ Multi-cloud cost analytics platform combining AWS Cost and Usage Reports (CUR), 
 >
 > Switch between modes with a single command. The same codebase works everywhere! Looking for the original local-only version? Check out [branch `v1`](https://github.com/ssp-data/cloud-cost-analyzer/tree/v1)
 
+>
+> **Note**: The live cloud demo is currently offline to save costs. You can recreate the full cloud setup with your own [ClickHouse Cloud](https://clickhouse.cloud) and [Rill Cloud](https://www.rilldata.com/try-free) instances following the [blog article](https://www.ssp.sh/blog/finops-dlt-clickhouse-rill/).
+
 ![](img/tech-stack.png)
 
 
@@ -56,6 +59,8 @@ Perfect for: Development, testing, small datasets
 make run-all-cloud  # ETL → ClickHouse Cloud → Anonymize → Rill Cloud/Local
 ```
 Perfect for: Production, team collaboration, large datasets, public dashboards
+
+> **Note**: The ClickHouse cluster is currently offline to save costs. The cloud setup is fully documented and functional—you'll just need your own ClickHouse Cloud instance.
 
 **Additional commands:**
 ```sh
