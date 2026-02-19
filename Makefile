@@ -92,6 +92,10 @@ setup-connector-clickhouse:
 	@sed -i 's/^olap_connector:.*$$/olap_connector: clickhouse/' viz_rill/rill.yaml
 	@sed -i 's/^RILL_CONNECTOR=.*$$/RILL_CONNECTOR="clickhouse"/' viz_rill/.env
 
+setup-connector-motherduck:
+	@sed -i 's/^olap_connector:.*$$/olap_connector: motherduck/' viz_rill/rill.yaml
+	@sed -i 's/^RILL_CONNECTOR=.*$$/RILL_CONNECTOR="motherduck"/' viz_rill/.env
+
 set-connector-duckdb:
 	@echo "Setting Rill connector to DuckDB..."
 	@$(MAKE) setup-connector-duckdb
@@ -101,6 +105,11 @@ set-connector-clickhouse:
 	@echo "Setting Rill connector to ClickHouse..."
 	@$(MAKE) setup-connector-clickhouse
 	@echo "✅ Connector set to ClickHouse (cloud database)"
+
+set-connector-motherduck:
+	@echo "Setting Rill connector to MotherDuck..."
+	@$(MAKE) setup-connector-motherduck
+	@echo "✅ Connector set to MotherDuck (cloud DuckDB)"
 
 
 run-aws: check-secrets
@@ -148,7 +157,6 @@ serve-clickhouse: setup-connector-clickhouse
 	@rill start viz_rill || true
 	@$(MAKE) setup-connector-clickhouse
 
-#FIX: setup-connector-duckdb is not working, as RIll cloud is syncing it back to clickhouse 
 demo: install-rill setup-connector-duckdb
 	@echo "================================================================================"
 	@echo "Running in DEMO mode with sample data"
@@ -235,6 +243,32 @@ init-clickhouse:
 ingest-normalized-clickhouse:
 	@echo "Ingesting normalized AWS & GCP data to ClickHouse..."
 	DLT_DESTINATION=clickhouse uv run python pipelines/ingest_normalized_pipeline.py
+
+## MotherDuck (writes directly to MotherDuck cloud DuckDB)
+run-aws-motherduck:
+	DLT_DESTINATION=motherduck uv run python pipelines/aws_pipeline.py
+	echo "####################################################################"
+run-gcp-motherduck:
+	DLT_DESTINATION=motherduck uv run python pipelines/google_bq_incremental_pipeline.py
+	echo "####################################################################"
+run-stripe-motherduck:
+	DLT_DESTINATION=motherduck uv run python pipelines/stripe_pipeline.py
+	echo "####################################################################"
+
+# Run dlt incremental loads (MotherDuck destination)
+run-etl-motherduck: run-aws-motherduck run-gcp-motherduck run-stripe-motherduck
+	@echo "✅ MotherDuck ETL complete (data in MotherDuck cloud)"
+
+serve-motherduck: setup-connector-motherduck
+	@echo "Starting Rill with MotherDuck connector..."
+	@rill start viz_rill || true
+	@$(MAKE) setup-connector-motherduck
+
+clear-motherduck:
+	@echo "Clearing MotherDuck schemas (interactive)..."
+	uv run python scripts/clear_motherduck.py
+
+run-all-motherduck: install run-etl-motherduck serve-motherduck
 
 ## Cloud Deployment with Anonymization (for public demos)
 # Simple approach: Run normal ETL, then anonymize data directly in ClickHouse

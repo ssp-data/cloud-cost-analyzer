@@ -1,13 +1,21 @@
 -- Stripe Revenue Model
--- Switches between DuckDB (parquet) and ClickHouse based on RILL_CONNECTOR env var
+-- Switches between DuckDB (parquet), MotherDuck, and ClickHouse based on RILL_CONNECTOR env var
 -- Selects ALL columns to maintain compatibility with existing dashboards
 
-{{ if .env.RILL_CONNECTOR }}
+{{ if eq .env.RILL_CONNECTOR "clickhouse" }}
 -- ClickHouse: Query table directly
 SELECT
   toDate(FROM_UNIXTIME(created)) AS date,
   *
 FROM stripe_costs___balance_transaction
+WHERE amount IS NOT NULL
+
+{{ else if eq .env.RILL_CONNECTOR "motherduck" }}
+-- MotherDuck: Query table in cloud DuckDB (same SQL syntax as local DuckDB)
+SELECT
+  CAST(to_timestamp(created) AS DATE) AS date,
+  *
+FROM stripe_costs.balance_transaction
 WHERE amount IS NOT NULL
 
 {{ else }}

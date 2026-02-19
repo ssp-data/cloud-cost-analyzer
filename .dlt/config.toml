@@ -18,6 +18,10 @@ file_format = "parquet"
 database = "dlt"
 dataset_name_prefix = ""  # No prefix for clean dataset names
 
+# MotherDuck destination configuration
+[destination.motherduck.credentials]
+database = "cloud_cost_analytics"
+
 [sources.filesystem]
 local_dir = "/home/sspaeti/Documents/datalake/dlt-stage" # fill this in!
 bucket_url = "https://s3.us-west-1.amazonaws.com" # fill this in!

@@ -1,0 +1,5 @@
+type: connector
+driver: duckdb
+mode: readwrite
+token: "{{ .env.CONNECTOR_MOTHERDUCK_TOKEN }}"
+path: "md:cloud_cost_analytics"
